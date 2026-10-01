@@ -27,12 +27,12 @@ function useChartColors() {
   const dark = theme === "dark";
   return React.useMemo(
     () => ({
-      grid: dark ? "#1e293b" : "#e2e8f0",
-      axis: dark ? "#334155" : "#cbd5e1",
-      tooltipBg: dark ? "#0f172a" : "#ffffff",
-      tooltipBorder: dark ? "#334155" : "#e2e8f0",
-      tooltipText: dark ? "#e2e8f0" : "#0f172a",
-      legend: dark ? "#94a3b8" : "#475569",
+      grid: dark ? "#262626" : "#e2e8f0",
+      axis: dark ? "#3f3f3f" : "#cbd5e1",
+      tooltipBg: dark ? "#0a0a0a" : "#ffffff",
+      tooltipBorder: dark ? "#2a2a2a" : "#e2e8f0",
+      tooltipText: dark ? "#e5e5e5" : "#0f172a",
+      legend: dark ? "#a3a3a3" : "#475569",
     }),
     [dark]
   );
