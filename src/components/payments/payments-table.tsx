@@ -245,7 +245,7 @@ export function PaymentsTable({
       )}
 
       {/* Table */}
-      <div className="rounded-lg border border-slate-200 bg-white">
+      <div className="rounded-lg border border-slate-200 bg-transparent">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

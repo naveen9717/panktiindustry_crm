@@ -141,7 +141,7 @@ export function TeamCustomersTable({
 
       {/* Filters */}
       {showFilters && (
-        <div className="rounded-lg border border-slate-200 bg-white p-4">
+        <div className="rounded-lg border border-slate-200 bg-transparent p-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-xs font-medium text-slate-700">Status</label>

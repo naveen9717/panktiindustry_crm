@@ -76,7 +76,7 @@ export function DataTable<TData extends RowData, TValue>({
         </div>
       )}
 
-      <div className="rounded-lg border border-slate-200 bg-white">
+      <div className="rounded-lg border border-slate-200 bg-transparent">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
