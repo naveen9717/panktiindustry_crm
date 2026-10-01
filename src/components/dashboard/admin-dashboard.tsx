@@ -3,7 +3,7 @@ import { getLeadsOverTime, getCustomerStats } from "@/lib/services/customer";
 import { getPaymentsOverTime } from "@/lib/services/payment";
 import { KpiCard } from "./kpi-card";
 import { LeadsOverTimeChart, LeadStatusChart, PaymentsOverTimeChart, TeamPerformanceChart } from "./charts";
-import { Users, UserCheck, Target, TrendingUp, Clock, IndianRupee, CreditCard } from "lucide-react";
+import { Users, UserCheck, Target, Clock, IndianRupee, CreditCard } from "lucide-react";
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
 import { Badge, getLeadStatusBadgeVariant, getPaymentStatusBadgeVariant } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,7 +31,7 @@ export async function AdminDashboard({ user }: { user: { id: string; firstName: 
   return (
     <div className="p-6 space-y-6">
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <KpiCard
           title="Total Leads"
           value={stats.totalLeads}
@@ -49,12 +49,6 @@ export async function AdminDashboard({ user }: { user: { id: string; firstName: 
           value={stats.activeLeads}
           icon={<Target className="h-6 w-6 text-amber-600" />}
           iconClassName="kpi-tile-amber"
-        />
-        <KpiCard
-          title="Converted"
-          value={stats.convertedLeads}
-          icon={<TrendingUp className="h-6 w-6 text-violet-600" />}
-          iconClassName="kpi-tile-violet"
         />
         <KpiCard
           title="Pending Payments"
