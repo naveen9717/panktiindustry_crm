@@ -84,7 +84,7 @@ export function LoginForm() {
           </p>
         </div>
 
-        <div className="card-elevated rounded-xl border border-slate-200 bg-white p-8">
+        <div className="card-elevated rounded-xl border border-slate-200 bg-transparent p-8">
           {from && (
             <div className="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-700">
               Please sign in to access this page.

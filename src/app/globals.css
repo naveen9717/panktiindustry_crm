@@ -9,7 +9,28 @@
 
 body {
   @apply bg-slate-50 text-slate-900 antialiased;
+  text-transform: uppercase;
 }
+/* Form controls don't inherit text-transform (UA default) — force it */
+button,
+input,
+select,
+textarea,
+optgroup,
+option {
+  text-transform: uppercase;
+}
+
+/* ------------------------------------------------------------------ */
+/* All surfaces take the page background color so elements blend into  */
+/* the bg (both modes). Hovers re-declared unlayered so they still win */
+/* over the .bg-white rule (layered utilities would lose to it).       */
+/* ------------------------------------------------------------------ */
+.bg-white {
+  background-color: rgba(248, 250, 252, 0.9);
+}
+.hover\:bg-slate-50:hover { background-color: #eef2f7; }
+.hover\:bg-slate-100:hover { background-color: #f1f5f9; }
 
 /* ------------------------------------------------------------------ */
 /* Dark palette remap: applies the slate/neutral + status tokens used   */
@@ -23,9 +44,9 @@ body {
   color-scheme: dark;
 }
 
-/* Surfaces → indigo-navy with a faint white sheen */
+/* Surfaces → the page background color (with a faint sheen) */
 .dark .bg-white {
-  background-color: #13112a;
+  background-color: rgba(15, 14, 23, 0.9);
   background-image: linear-gradient(160deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015) 55%, transparent);
 }
 .dark .bg-slate-50 { background-color: #1a1825; }
@@ -108,8 +129,8 @@ body {
 
 /* ---- Header (glass) ---- */
 .surface-header {
-  background-color: rgba(255, 255, 255, 0.85);
-  background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.92), rgba(240, 244, 255, 0.8) 60%, rgba(253, 240, 248, 0.8));
+  background-color: rgba(248, 250, 252, 0.85);
+  background-image: linear-gradient(90deg, rgba(248, 250, 252, 0.92), rgba(240, 244, 255, 0.8) 60%, rgba(253, 240, 248, 0.8));
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
@@ -120,8 +141,8 @@ body {
 
 /* ---- Sidebar ---- */
 .surface-sidebar {
-  background-color: #ffffff;
-  background-image: linear-gradient(180deg, #ffffff 0%, #f6f7fd 100%);
+  background-color: rgba(248, 250, 252, 0.92);
+  background-image: linear-gradient(180deg, rgba(248, 250, 252, 0.95) 0%, rgba(246, 247, 253, 0.9) 100%);
 }
 .dark .surface-sidebar {
   background-color: #0d0c1a;
