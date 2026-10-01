@@ -5,17 +5,142 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Dialog, DialogHeader, DialogTitle, DialogContent, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Upload, FileText, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
+import { Select } from "@/components/ui/select";
+import { Upload, FileText, CheckCircle, AlertTriangle, ArrowRight } from "lucide-react";
 
 interface ImportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
+/** Target CRM fields understood by POST /api/customers/import. */
+const CRM_FIELDS = [
+  { value: "name", label: "Name (required)" },
+  { value: "email", label: "Email" },
+  { value: "phone", label: "Phone" },
+  { value: "address", label: "Address" },
+  { value: "state", label: "State" },
+  { value: "city", label: "City" },
+  { value: "meta_lead_id", label: "Meta Lead ID" },
+  { value: "campaign_name", label: "Campaign Name" },
+  { value: "adset_name", label: "Ad Set Name" },
+  { value: "ad_name", label: "Ad Name" },
+  { value: "form_name", label: "Form Name" },
+  { value: "source", label: "Source" },
+  { value: "leadStatus", label: "Lead Status" },
+  { value: "remarks", label: "Remarks" },
+  { value: "assignedTeamMember", label: "Assigned Team Member" },
+  { value: "custom", label: "Custom Field" },
+  { value: "skip", label: "Don't import" },
+];
+
+/** Fields that may only come from one column ("custom" allows many). */
+const SINGLE_VALUE_FIELDS = CRM_FIELDS.filter(
+  (f) => f.value !== "custom" && f.value !== "skip"
+).map((f) => f.value);
+
+/** Exact normalized header → CRM field. */
+const EXACT_MAP: Record<string, string> = {
+  name: "name", full_name: "name", fullname: "name", customer_name: "name", lead_name: "name",
+  email: "email", email_address: "email", emailid: "email", email_id: "email",
+  phone: "phone", phone_number: "phone", phonenumber: "phone", mobile: "phone",
+  mobile_number: "phone", contact_number: "phone", whatsapp_number: "phone",
+  address: "address", street_address: "address",
+  state: "state", city: "city",
+  lead_id: "meta_lead_id", meta_lead_id: "meta_lead_id", id: "meta_lead_id",
+  campaign: "campaign_name", campaign_name: "campaign_name",
+  adset: "adset_name", ad_set: "adset_name", adset_name: "adset_name", ad_set_name: "adset_name",
+  ad_name: "ad_name", ad: "ad_name",
+  form: "form_name", form_name: "form_name",
+  source: "source",
+  status: "leadStatus", lead_status: "leadStatus", leadstatus: "leadStatus",
+  remarks: "remarks", remark: "remarks", comments: "remarks", comment: "remarks",
+  notes: "remarks", note: "remarks",
+  assigned_to: "assignedTeamMember", assignee: "assignedTeamMember", owner: "assignedTeamMember",
+  assigned_team_member: "assignedTeamMember", team_member: "assignedTeamMember",
+};
+
+/** Fallback substring rules (checked in order). */
+const CONTAINS_RULES: [RegExp, string][] = [
+  [/email/, "email"],
+  [/(phone|mobile|whatsapp|telephone)/, "phone"],
+  [/(^|_)lead_?id$/, "meta_lead_id"],
+  [/(^|_)name$/, "name"],
+  [/lead_?status/, "leadStatus"],
+  [/address|street/, "address"],
+  [/(remark|comment|note)/, "remarks"],
+  [/(assign|owner)/, "assignedTeamMember"],
+];
+
+/** Common Meta/export noise columns → skip by default. */
+const NOISE_PATTERN =
+  /^(created_?(time|at)|timestamp|updated_?(time|at)|is_[a-z_]+|has_[a-z_]+|page_?url|form_?id|ad_?id|campaign_?id|adset_?id|ad_?set_?id|account_?id|optimization_?goal|platform|gender|age|zip|postal_?code|country)$/;
+
+function normalizeHeader(header: string): string {
+  return header
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function detectField(header: string): string {
+  const n = normalizeHeader(header);
+  if (!n) return "skip";
+  if (EXACT_MAP[n]) return EXACT_MAP[n];
+  if (NOISE_PATTERN.test(n)) return "skip";
+  for (const [pattern, field] of CONTAINS_RULES) {
+    if (pattern.test(n)) return field;
+  }
+  return "custom";
+}
+
+function parseCsvLine(line: string): string[] {
+  const result: string[] = [];
+  let current = "";
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    const nextChar = line[i + 1];
+    if (inQuotes) {
+      if (char === '"' && nextChar === '"') {
+        current += '"';
+        i++;
+      } else if (char === '"') {
+        inQuotes = false;
+      } else {
+        current += char;
+      }
+    } else if (char === '"') {
+      inQuotes = true;
+    } else if (char === ",") {
+      result.push(current);
+      current = "";
+    } else {
+      current += char;
+    }
+  }
+  result.push(current);
+  return result;
+}
+
+interface CsvColumn {
+  /** Original header text (display) */
+  label: string;
+  /** Lowercased/trimmed header — matches how the server keys row values */
+  csvColumn: string;
+  /** First data row value, for preview */
+  sample: string;
+}
+
 export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
   const router = useRouter();
+  const inputRef = React.useRef<HTMLInputElement>(null);
   const [file, setFile] = React.useState<File | null>(null);
   const [csvContent, setCsvContent] = React.useState("");
+  const [columns, setColumns] = React.useState<CsvColumn[]>([]);
+  const [rowCount, setRowCount] = React.useState(0);
+  const [mapping, setMapping] = React.useState<string[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [result, setResult] = React.useState<{
     totalRows: number;
@@ -26,16 +151,54 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
     errors: { row: number; errors: string[] }[];
   } | null>(null);
 
+  const nameMapped = mapping.includes("name");
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setCsvContent(event.target?.result as string);
-      };
-      reader.readAsText(selectedFile);
-    }
+    if (!selectedFile) return;
+    setFile(selectedFile);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = (event.target?.result as string) || "";
+      setCsvContent(content);
+
+      // Parse header row + first data row for the mapping preview
+      const lines = content.split(/\r?\n/).filter((line) => line.trim());
+      if (lines.length === 0) {
+        setColumns([]);
+        setMapping([]);
+        setRowCount(0);
+        return;
+      }
+      const headers = parseCsvLine(lines[0]);
+      const sample = lines.length > 1 ? parseCsvLine(lines[1]) : [];
+      const cols: CsvColumn[] = headers
+        .map((h, i) => ({
+          label: h.trim() || `Column ${i + 1}`,
+          csvColumn: h.toLowerCase().trim(),
+          sample: (sample[i] || "").trim(),
+        }))
+        .filter((c) => c.csvColumn.length > 0);
+
+      setColumns(cols);
+      setMapping(cols.map((c) => detectField(c.label)));
+      setRowCount(Math.max(lines.length - 1, 0));
+    };
+    reader.readAsText(selectedFile);
+  };
+
+  const setField = (index: number, field: string) => {
+    setMapping((prev) => {
+      const next = [...prev];
+      // A CRM field may come from only one column (custom/skip excluded)
+      if (field !== "custom" && field !== "skip") {
+        next.forEach((f, i) => {
+          if (i !== index && f === field) next[i] = "skip";
+        });
+      }
+      next[index] = field;
+      return next;
+    });
   };
 
   const handleImport = async () => {
@@ -43,13 +206,21 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
       toast.error("Please select a CSV file");
       return;
     }
+    if (!nameMapped) {
+      toast.error("Map one column to Name before importing");
+      return;
+    }
 
     setLoading(true);
     try {
+      const mappings = columns
+        .map((c, i) => ({ csvColumn: c.csvColumn, crmField: mapping[i] }))
+        .filter((m) => m.crmField && m.crmField !== "skip");
+
       const res = await fetch("/api/customers/import", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ csvContent, skipDuplicates: true }),
+        body: JSON.stringify({ csvContent, mappings, skipDuplicates: true }),
       });
 
       const data = await res.json();
@@ -73,7 +244,11 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
     onOpenChange(false);
     setFile(null);
     setCsvContent("");
+    setColumns([]);
+    setMapping([]);
+    setRowCount(0);
     setResult(null);
+    if (inputRef.current) inputRef.current.value = "";
   };
 
   return (
@@ -85,30 +260,68 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
       <DialogContent className="max-w-2xl">
         {!result ? (
           <div className="space-y-4">
-            <div className="rounded-lg border-2 border-dashed border-slate-300 p-8 text-center">
+            {/* File picker */}
+            <label className="relative block cursor-pointer rounded-lg border-2 border-dashed border-slate-300 p-8 text-center transition-colors hover:border-indigo-400">
               <Upload className="mx-auto h-8 w-8 text-slate-400" />
               <p className="mt-2 text-sm text-slate-600">
                 {file ? file.name : "Click to select a CSV file"}
               </p>
               <p className="mt-1 text-xs text-slate-400">
-                CSV should have columns: name, email, phone, address, state, city, leadStatus, remarks, assignedTeamMember
+                {file
+                  ? `${rowCount} rows · ${columns.length} columns detected`
+                  : "Any CSV works — map its columns to CRM fields below"}
               </p>
               <input
+                ref={inputRef}
                 type="file"
                 accept=".csv"
                 onChange={handleFileChange}
-                className="absolute inset-0 cursor-pointer opacity-0"
-                style={{ position: "relative" }}
+                className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
               />
-            </div>
+            </label>
 
-            <div className="rounded-lg bg-slate-50 p-4">
-              <p className="text-xs font-medium text-slate-700">Expected CSV format:</p>
-              <pre className="mt-2 text-xs text-slate-600">
-{`name,email,phone,address,state,city,leadStatus,remarks,assignedTeamMember
-John Doe,john@example.com,9876543210,123 Main St,Mumbai,Maharashtra,NEW,Interested in services,Mike`}
-              </pre>
-            </div>
+            {/* Field mapping */}
+            {columns.length > 0 && (
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-slate-900">Map CSV columns to CRM fields</p>
+                  <span className="flex items-center gap-1 text-xs text-slate-500">
+                    CSV <ArrowRight className="h-3 w-3" /> CRM
+                  </span>
+                </div>
+
+                <div className="mt-3 max-h-64 space-y-2 overflow-y-auto pr-1">
+                  {columns.map((col, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-slate-900">{col.label}</p>
+                        <p className="truncate text-xs text-slate-400">
+                          {col.sample || "—"}
+                        </p>
+                      </div>
+                      <Select
+                        className="w-48 shrink-0"
+                        value={mapping[i] || "skip"}
+                        onChange={(e) => setField(i, e.target.value)}
+                        aria-label={`Map column ${col.label}`}
+                      >
+                        {CRM_FIELDS.map((f) => (
+                          <option key={f.value} value={f.value}>
+                            {f.label}
+                          </option>
+                        ))}
+                      </Select>
+                    </div>
+                  ))}
+                </div>
+
+                {!nameMapped && (
+                  <p className="mt-2 text-xs text-red-600">
+                    Map one column to “Name (required)” to continue.
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         ) : (
           <div className="space-y-4">
@@ -168,7 +381,11 @@ John Doe,john@example.com,9876543210,123 Main St,Mumbai,Maharashtra,NEW,Interest
             <Button variant="outline" onClick={handleClose}>
               Cancel
             </Button>
-            <Button onClick={handleImport} loading={loading} disabled={!csvContent}>
+            <Button
+              onClick={handleImport}
+              loading={loading}
+              disabled={!csvContent || !nameMapped}
+            >
               <FileText className="h-4 w-4" />
               Import
             </Button>
