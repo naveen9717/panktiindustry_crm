@@ -74,15 +74,44 @@ const COMMON_META_MAPPINGS: Record<string, string> = {
   "source": "source",
 };
 
+const CSV_DELIMITERS = [",", ";", "\t", "|"];
+
+/** Pick the delimiter that actually separates the most fields in a line. */
+function detectDelimiter(line: string): string {
+  let best = ",";
+  let bestCount = 0;
+  for (const d of CSV_DELIMITERS) {
+    const count = line.split(d).length - 1;
+    if (count > bestCount) {
+      bestCount = count;
+      best = d;
+    }
+  }
+  return best;
+}
+
 export function parseCsvContent(content: string): { headers: string[]; rows: CsvRow[] } {
-  const lines = content.split(/\r?\n/).filter((line) => line.trim());
+  const cleaned = content.replace(/^\uFEFF/, ""); // strip BOM
+  const lines = cleaned.split(/\r?\n/).filter((line) => line.trim());
   if (lines.length < 2) return { headers: [], rows: [] };
 
-  const headers = parseCsvLine(lines[0]).map((h) => h.toLowerCase().trim());
+  let headerIndex = 0;
+  let delimiter = detectDelimiter(lines[0]);
+  // Title-line fallback: line 1 is a single field but line 2 has several
+  if (
+    lines.length > 2 &&
+    parseCsvLine(lines[0], delimiter).length === 1 &&
+    parseCsvLine(lines[1], delimiter).length > 1
+  ) {
+    headerIndex = 1;
+    delimiter = detectDelimiter(lines[1]);
+  }
+
+  const headers = parseCsvLine(lines[headerIndex], delimiter).map((h) => h.toLowerCase().trim());
   const rows: CsvRow[] = [];
 
-  for (let i = 1; i < lines.length; i++) {
-    const values = parseCsvLine(lines[i]);
+  for (let i = headerIndex + 1; i < lines.length; i++) {
+    const values = parseCsvLine(lines[i], delimiter);
     const row: CsvRow = {};
     headers.forEach((header, index) => {
       row[header] = values[index]?.trim() || "";
@@ -93,7 +122,7 @@ export function parseCsvContent(content: string): { headers: string[]; rows: Csv
   return { headers, rows };
 }
 
-function parseCsvLine(line: string): string[] {
+function parseCsvLine(line: string, delimiter = ","): string[] {
   const result: string[] = [];
   let current = "";
   let inQuotes = false;
@@ -114,7 +143,7 @@ function parseCsvLine(line: string): string[] {
     } else {
       if (char === '"') {
         inQuotes = true;
-      } else if (char === ',') {
+      } else if (char === delimiter) {
         result.push(current);
         current = "";
       } else {

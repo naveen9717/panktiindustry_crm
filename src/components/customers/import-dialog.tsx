@@ -95,7 +95,23 @@ function detectField(header: string): string {
   return "custom";
 }
 
-function parseCsvLine(line: string): string[] {
+const CSV_DELIMITERS = [",", ";", "\t", "|"];
+
+/** Pick the delimiter that actually separates the most fields in a line. */
+function detectDelimiter(line: string): string {
+  let best = ",";
+  let bestCount = 0;
+  for (const d of CSV_DELIMITERS) {
+    const count = line.split(d).length - 1;
+    if (count > bestCount) {
+      bestCount = count;
+      best = d;
+    }
+  }
+  return best;
+}
+
+function parseCsvLine(line: string, delimiter = ","): string[] {
   const result: string[] = [];
   let current = "";
   let inQuotes = false;
@@ -113,7 +129,7 @@ function parseCsvLine(line: string): string[] {
       }
     } else if (char === '"') {
       inQuotes = true;
-    } else if (char === ",") {
+    } else if (char === delimiter) {
       result.push(current);
       current = "";
     } else {
@@ -122,6 +138,38 @@ function parseCsvLine(line: string): string[] {
   }
   result.push(current);
   return result;
+}
+
+/**
+ * Extract headers + first data row for the mapping preview.
+ * Handles BOM, auto-detected delimiters, and files with a title line
+ * above the header row (falls back when line 1 is a single field
+ * but line 2 has several).
+ */
+function extractCsvStructure(content: string): {
+  headers: string[];
+  sample: string[];
+  rowCount: number;
+} {
+  const cleaned = content.replace(/^\uFEFF/, "");
+  const lines = cleaned.split(/\r?\n/).filter((line) => line.trim());
+  if (lines.length === 0) return { headers: [], sample: [], rowCount: 0 };
+
+  let headerIndex = 0;
+  let delimiter = detectDelimiter(lines[0]);
+  if (
+    lines.length > 2 &&
+    parseCsvLine(lines[0], delimiter).length === 1 &&
+    parseCsvLine(lines[1], delimiter).length > 1
+  ) {
+    headerIndex = 1;
+    delimiter = detectDelimiter(lines[1]);
+  }
+
+  const headers = parseCsvLine(lines[headerIndex], delimiter);
+  const sample =
+    lines.length > headerIndex + 1 ? parseCsvLine(lines[headerIndex + 1], delimiter) : [];
+  return { headers, sample, rowCount: Math.max(lines.length - headerIndex - 1, 0) };
 }
 
 interface CsvColumn {
@@ -163,15 +211,7 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
       setCsvContent(content);
 
       // Parse header row + first data row for the mapping preview
-      const lines = content.split(/\r?\n/).filter((line) => line.trim());
-      if (lines.length === 0) {
-        setColumns([]);
-        setMapping([]);
-        setRowCount(0);
-        return;
-      }
-      const headers = parseCsvLine(lines[0]);
-      const sample = lines.length > 1 ? parseCsvLine(lines[1]) : [];
+      const { headers, sample, rowCount } = extractCsvStructure(content);
       const cols: CsvColumn[] = headers
         .map((h, i) => ({
           label: h.trim() || `Column ${i + 1}`,
@@ -182,7 +222,7 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
 
       setColumns(cols);
       setMapping(cols.map((c) => detectField(c.label)));
-      setRowCount(Math.max(lines.length - 1, 0));
+      setRowCount(rowCount);
     };
     reader.readAsText(selectedFile);
   };
