@@ -1,5 +1,5 @@
 import type { DB } from "@/db";
-import { customers, leadImports, users, type Customer } from "@/db/schema";
+import { customers, leadImports, type Customer } from "@/db/schema";
 import { eq, and, or } from "drizzle-orm";
 import { logActivity } from "./activity";
 
@@ -207,6 +207,8 @@ interface ImportCustomersParams {
   ipAddress?: string | null;
   skipDuplicates?: boolean;
   updateExisting?: boolean;
+  /** Team member assigned to every imported lead (chosen in the import dialog) */
+  assignedTeamMemberId?: string | null;
 }
 
 export async function importCustomers({
@@ -217,6 +219,7 @@ export async function importCustomers({
   ipAddress,
   skipDuplicates = true,
   updateExisting = false,
+  assignedTeamMemberId,
 }: ImportCustomersParams): Promise<CsvImportResult> {
   const validationResults = validateCsvRows(rows, mappings);
   const validResults = validationResults.filter((r) => r.valid);
@@ -234,20 +237,6 @@ export async function importCustomers({
       errors.push({ row: index + 2, errors: result.errors });
     }
   });
-
-  // Team member lookup for the "assignedTeamMember" mapping (name or email → id)
-  const teamRows = await db
-    .select({ id: users.id, firstName: users.firstName, lastName: users.lastName, email: users.email })
-    .from(users);
-  const teamMemberIds = new Map<string, string>();
-  for (const member of teamRows) {
-    teamMemberIds.set(`${member.firstName} ${member.lastName}`.toLowerCase().trim(), member.id);
-    if (member.email) teamMemberIds.set(member.email.toLowerCase().trim(), member.id);
-  }
-  const resolveTeamMember = (value: string | null): string | null => {
-    if (!value) return null;
-    return teamMemberIds.get(value.toLowerCase().trim()) || null;
-  };
 
   // Process in batches of 100
   const batchSize = 100;
@@ -291,14 +280,6 @@ export async function importCustomers({
                 state: getFieldValue("state") || existing.state,
                 city: getFieldValue("city") || existing.city,
                 leadStatus: normalizeLeadStatus(getFieldValue("leadStatus")) || existing.leadStatus,
-                remarks: getFieldValue("remarks") || existing.remarks,
-                assignedTeamMemberId:
-                  resolveTeamMember(getFieldValue("assignedTeamMember")) || existing.assignedTeamMemberId,
-                campaignName: getFieldValue("campaign_name") || existing.campaignName,
-                adsetName: getFieldValue("adset_name") || existing.adsetName,
-                adName: getFieldValue("ad_name") || existing.adName,
-                formName: getFieldValue("form_name") || existing.formName,
-                source: getFieldValue("source") || existing.source,
                 updatedById: userId,
                 updatedAt: new Date(),
               })
@@ -324,13 +305,8 @@ export async function importCustomers({
           state: getFieldValue("state") || null,
           city: getFieldValue("city") || null,
           leadStatus: normalizeLeadStatus(getFieldValue("leadStatus")) || "NEW",
-          remarks: getFieldValue("remarks") || null,
-          assignedTeamMemberId: resolveTeamMember(getFieldValue("assignedTeamMember")),
-          source: getFieldValue("source") || "Meta Ads",
-          campaignName: getFieldValue("campaign_name") || null,
-          adsetName: getFieldValue("adset_name") || null,
-          adName: getFieldValue("ad_name") || null,
-          formName: getFieldValue("form_name") || null,
+          assignedTeamMemberId: assignedTeamMemberId || null,
+          source: "Meta Ads",
           customFields: JSON.stringify(
             mappings
               .filter((m) => m.crmField === "custom")

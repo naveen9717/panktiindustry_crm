@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { csvContent, mappings, skipDuplicates = true, updateExisting = false } = body;
+    const { csvContent, mappings, skipDuplicates = true, updateExisting = false, assignedTeamMemberId } = body;
 
     if (!csvContent || typeof csvContent !== "string") {
       return NextResponse.json({ error: "CSV content is required" }, { status: 400 });
@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
       ipAddress: ip,
       skipDuplicates,
       updateExisting,
+      assignedTeamMemberId: typeof assignedTeamMemberId === "string" ? assignedTeamMemberId : null,
     });
 
     return NextResponse.json(result);

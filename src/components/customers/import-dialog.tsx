@@ -21,23 +21,9 @@ const CRM_FIELDS = [
   { value: "address", label: "Address" },
   { value: "state", label: "State" },
   { value: "city", label: "City" },
-  { value: "meta_lead_id", label: "Meta Lead ID" },
-  { value: "campaign_name", label: "Campaign Name" },
-  { value: "adset_name", label: "Ad Set Name" },
-  { value: "ad_name", label: "Ad Name" },
-  { value: "form_name", label: "Form Name" },
-  { value: "source", label: "Source" },
   { value: "leadStatus", label: "Lead Status" },
-  { value: "remarks", label: "Remarks" },
-  { value: "assignedTeamMember", label: "Assigned Team Member" },
-  { value: "custom", label: "Custom Field" },
   { value: "skip", label: "Don't import" },
 ];
-
-/** Fields that may only come from one column ("custom" allows many). */
-const SINGLE_VALUE_FIELDS = CRM_FIELDS.filter(
-  (f) => f.value !== "custom" && f.value !== "skip"
-).map((f) => f.value);
 
 /** Exact normalized header → CRM field. */
 const EXACT_MAP: Record<string, string> = {
@@ -47,29 +33,16 @@ const EXACT_MAP: Record<string, string> = {
   mobile_number: "phone", contact_number: "phone", whatsapp_number: "phone",
   address: "address", street_address: "address",
   state: "state", city: "city",
-  lead_id: "meta_lead_id", meta_lead_id: "meta_lead_id", id: "meta_lead_id",
-  campaign: "campaign_name", campaign_name: "campaign_name",
-  adset: "adset_name", ad_set: "adset_name", adset_name: "adset_name", ad_set_name: "adset_name",
-  ad_name: "ad_name", ad: "ad_name",
-  form: "form_name", form_name: "form_name",
-  source: "source",
   status: "leadStatus", lead_status: "leadStatus", leadstatus: "leadStatus",
-  remarks: "remarks", remark: "remarks", comments: "remarks", comment: "remarks",
-  notes: "remarks", note: "remarks",
-  assigned_to: "assignedTeamMember", assignee: "assignedTeamMember", owner: "assignedTeamMember",
-  assigned_team_member: "assignedTeamMember", team_member: "assignedTeamMember",
 };
 
 /** Fallback substring rules (checked in order). */
 const CONTAINS_RULES: [RegExp, string][] = [
   [/email/, "email"],
   [/(phone|mobile|whatsapp|telephone)/, "phone"],
-  [/(^|_)lead_?id$/, "meta_lead_id"],
   [/(^|_)name$/, "name"],
   [/lead_?status/, "leadStatus"],
   [/address|street/, "address"],
-  [/(remark|comment|note)/, "remarks"],
-  [/(assign|owner)/, "assignedTeamMember"],
 ];
 
 /** Common Meta/export noise columns → skip by default. */
@@ -92,7 +65,7 @@ function detectField(header: string): string {
   for (const [pattern, field] of CONTAINS_RULES) {
     if (pattern.test(n)) return field;
   }
-  return "custom";
+  return "skip";
 }
 
 const CSV_DELIMITERS = [",", ";", "\t", "|"];
@@ -201,6 +174,18 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
 
   const nameMapped = mapping.includes("name");
 
+  const [teamMembers, setTeamMembers] = React.useState<{ id: string; name: string }[]>([]);
+  const [assignedTo, setAssignedTo] = React.useState("");
+
+  // Fetch team members for the "Assigned To" picker whenever the dialog opens
+  React.useEffect(() => {
+    if (!open) return;
+    fetch("/api/team-members")
+      .then((r) => (r.ok ? r.json() : { members: [] }))
+      .then((d) => setTeamMembers(d.members || []))
+      .catch(() => setTeamMembers([]));
+  }, [open]);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
@@ -230,8 +215,8 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
   const setField = (index: number, field: string) => {
     setMapping((prev) => {
       const next = [...prev];
-      // A CRM field may come from only one column (custom/skip excluded)
-      if (field !== "custom" && field !== "skip") {
+      // A CRM field may come from only one column
+      if (field !== "skip") {
         next.forEach((f, i) => {
           if (i !== index && f === field) next[i] = "skip";
         });
@@ -260,7 +245,12 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
       const res = await fetch("/api/customers/import", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ csvContent, mappings, skipDuplicates: true }),
+        body: JSON.stringify({
+          csvContent,
+          mappings,
+          skipDuplicates: true,
+          assignedTeamMemberId: assignedTo || null,
+        }),
       });
 
       const data = await res.json();
@@ -288,6 +278,7 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
     setMapping([]);
     setRowCount(0);
     setResult(null);
+    setAssignedTo("");
     if (inputRef.current) inputRef.current.value = "";
   };
 
@@ -319,6 +310,25 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
                 className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
               />
             </label>
+
+            {/* Assign imported leads to a team member */}
+            <div className="flex items-center gap-3">
+              <p className="w-40 shrink-0 text-sm font-semibold text-slate-900">
+                Assigned To
+              </p>
+              <Select
+                className="w-64"
+                value={assignedTo}
+                onChange={(e) => setAssignedTo(e.target.value)}
+              >
+                <option value="">Unassigned</option>
+                {teamMembers.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}
+                  </option>
+                ))}
+              </Select>
+            </div>
 
             {/* Field mapping */}
             {columns.length > 0 && (
