@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { getDb } from "@/lib/db/local";
 import { getCurrentUser } from "@/lib/auth/session";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { getTeamMemberById } from "@/lib/services/team-member";
@@ -15,6 +16,7 @@ export default async function TeamMemberPaymentsPage({
   searchParams: Promise<{ page?: string; search?: string }>;
 }) {
   const user = await getCurrentUser();
+  const db = await getDb();
 
   if (!user) {
     redirect("/login");
@@ -30,8 +32,9 @@ export default async function TeamMemberPaymentsPage({
   const search = sp.search || "";
 
   const [member, paymentsData] = await Promise.all([
-    getTeamMemberById(id),
+    getTeamMemberById(db, id),
     getPayments({
+      db,
       page,
       pageSize: 10,
       search,

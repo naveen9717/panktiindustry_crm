@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import type { ColumnDef } from "@tanstack/react-table";
+import type { LegacyColumnDef as ColumnDef } from "@tanstack/react-table/legacy";
 import { formatDate, formatDateTime, truncate } from "@/lib/utils";
 import { Badge, getLeadStatusBadgeVariant } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,6 @@ import type { Customer, User } from "@/db/schema";
 type CustomerWithRelations = Customer & {
   assignedTeamMember: Pick<User, "id" | "firstName" | "lastName" | "email"> | null;
   updatedBy: Pick<User, "id" | "firstName" | "lastName"> | null;
-  _count: { payments: number };
 };
 
 interface CustomersTableProps {
@@ -79,7 +78,7 @@ export function CustomersTable({
     router.push(`/admin/customers?${params.toString()}`);
   };
 
-  const columns: ColumnDef<CustomerWithRelations>[] = [
+  const columns: ColumnDef<CustomerWithRelations, any>[] = [
     {
       accessorKey: "name",
       header: "Name",

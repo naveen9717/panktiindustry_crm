@@ -5,7 +5,7 @@ import { SettingsPage } from "@/components/settings/settings-page";
 
 export const dynamic = "force-dynamic";
 
-export default async function SettingsPage() {
+export default async function AdminSettingsPage() {
   const user = await getCurrentUser();
 
   if (!user) {

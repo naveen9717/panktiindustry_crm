@@ -6,22 +6,22 @@ import { logActivity } from "./activity";
 interface CreateCustomerParams {
   db: DB;
   data: {
-    metaLeadId?: string;
+    metaLeadId?: string | null;
     name: string;
-    email?: string;
-    phone?: string;
-    address?: string;
-    state?: string;
-    city?: string;
+    email?: string | null;
+    phone?: string | null;
+    address?: string | null;
+    state?: string | null;
+    city?: string | null;
     leadStatus?: string;
-    source?: string;
-    campaignName?: string;
-    adsetName?: string;
-    adName?: string;
-    formName?: string;
-    customFields?: string;
-    remarks?: string;
-    assignedTeamMemberId?: string;
+    source?: string | null;
+    campaignName?: string | null;
+    adsetName?: string | null;
+    adName?: string | null;
+    formName?: string | null;
+    customFields?: string | null;
+    remarks?: string | null;
+    assignedTeamMemberId?: string | null;
   };
   userId: string;
   ipAddress?: string | null;
@@ -256,15 +256,13 @@ export async function getCustomers({
   }
 
   if (search) {
-    conditions.push(
-      or(
+    conditions.push(or(
         like(customers.name, `%${search}%`),
         like(customers.email, `%${search}%`),
         like(customers.phone, `%${search}%`),
         like(customers.metaLeadId, `%${search}%`),
         like(customers.id, `%${search}%`)
-      )
-    );
+      )!);
   }
 
   if (leadStatus) conditions.push(eq(customers.leadStatus, leadStatus as typeof customers.$inferSelect.leadStatus));
@@ -273,10 +271,10 @@ export async function getCustomers({
   if (campaign) conditions.push(like(customers.campaignName, `%${campaign}%`));
 
   if (dateFrom) {
-    conditions.push(sql`${customers.createdAt} >= ${new Date(dateFrom)}`);
+    conditions.push(sql`${customers.createdAt} >= ${Math.floor(new Date(dateFrom).getTime() / 1000)}`);
   }
   if (dateTo) {
-    conditions.push(sql`${customers.createdAt} <= ${new Date(dateTo)}`);
+    conditions.push(sql`${customers.createdAt} <= ${Math.floor(new Date(dateTo).getTime() / 1000)}`);
   }
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -466,7 +464,7 @@ export async function getLeadsOverTime(db: DB, userId?: string, userRole?: strin
     .where(
       and(
         ...(conditions.length > 0 ? conditions : []),
-        sql`${customers.createdAt} >= ${startDate}`
+        sql`${customers.createdAt} >= ${Math.floor(startDate.getTime() / 1000)}`
       )
     )
     .orderBy(asc(customers.createdAt));

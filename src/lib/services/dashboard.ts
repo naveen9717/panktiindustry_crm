@@ -36,9 +36,9 @@ export async function getAdminDashboardStats({ db }: DashboardStatsParams) {
     totalTeamMembers: totalTeamMembers[0]?.count || 0,
     activeLeads: activeLeads[0]?.count || 0,
     convertedLeads: convertedLeads[0]?.count || 0,
-    pendingPayments: pendingPayments[0]?.total || 0,
-    paymentsReceived: paymentsReceived[0]?.total || 0,
-    totalRevenue: totalRevenue[0]?.total || 0,
+    pendingPayments: Number(pendingPayments[0]?.total || 0),
+    paymentsReceived: Number(paymentsReceived[0]?.total || 0),
+    totalRevenue: Number(totalRevenue[0]?.total || 0),
   };
 }
 
@@ -72,11 +72,12 @@ export async function getTeamMemberDashboardStats({ db, userId }: DashboardStats
   ]);
 
   return {
+    myCustomers: myLeads[0]?.count || 0,
     myLeads: myLeads[0]?.count || 0,
     activeLeads: activeLeads[0]?.count || 0,
     convertedLeads: convertedLeads[0]?.count || 0,
-    pendingPayments: pendingPayments[0]?.total || 0,
-    paymentsReceived: paymentsReceived[0]?.total || 0,
+    pendingPayments: Number(pendingPayments[0]?.total || 0),
+    paymentsReceived: Number(paymentsReceived[0]?.total || 0),
   };
 }
 
@@ -142,7 +143,7 @@ export async function getTeamMemberPerformance(db: DB) {
         name: `${member.firstName} ${member.lastName}`,
         totalCustomers: totalCustomers[0]?.count || 0,
         converted: converted[0]?.count || 0,
-        paymentsReceived: paymentsReceived[0]?.total || 0,
+        paymentsReceived: Number(paymentsReceived[0]?.total || 0),
       };
     })
   );

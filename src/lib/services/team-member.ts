@@ -167,14 +167,12 @@ export async function getTeamMembers({
   const conditions: SQL[] = [eq(users.role, "TEAM_MEMBER")];
 
   if (search) {
-    conditions.push(
-      or(
+    conditions.push(or(
         like(users.firstName, `%${search}%`),
         like(users.lastName, `%${search}%`),
         like(users.email, `%${search}%`),
         like(users.phone, `%${search}%`)
-      )
-    );
+      )!);
   }
 
   if (status) conditions.push(eq(users.status, status as typeof users.$inferSelect.status));
@@ -210,7 +208,7 @@ export async function getTeamMembers({
   // Get stats for each member
   const membersWithStats = await Promise.all(
     members.map(async (member) => {
-      const [activeLeads, convertedLeads, paymentsReceived] = await Promise.all([
+      const [activeLeads, convertedLeads, paymentsReceived, assignedCustomers] = await Promise.all([
         db.select({ count: count() }).from(customers).where(
           and(
             eq(customers.assignedTeamMemberId, member.id),
@@ -229,13 +227,17 @@ export async function getTeamMembers({
             eq(payments.paymentStatus, "PAID")
           )
         ),
+        db.select({ count: count() }).from(customers).where(
+          eq(customers.assignedTeamMemberId, member.id)
+        ),
       ]);
 
       return {
         ...member,
+        _count: { assignedCustomers: assignedCustomers[0]?.count || 0 },
         activeLeads: activeLeads[0]?.count || 0,
         convertedLeads: convertedLeads[0]?.count || 0,
-        paymentsReceived: paymentsReceived[0]?.total || 0,
+        paymentsReceived: Number(paymentsReceived[0]?.total || 0),
       };
     })
   );
@@ -263,7 +265,7 @@ export async function getTeamMemberById(db: DB, id: string) {
 
   if (!member) return null;
 
-  const [activeLeads, convertedLeads, paymentsReceived] = await Promise.all([
+  const [activeLeads, convertedLeads, paymentsReceived, assignedCustomers] = await Promise.all([
     db.select({ count: count() }).from(customers).where(
       and(
         eq(customers.assignedTeamMemberId, id),
@@ -282,13 +284,17 @@ export async function getTeamMemberById(db: DB, id: string) {
         eq(payments.paymentStatus, "PAID")
       )
     ),
+    db.select({ count: count() }).from(customers).where(
+      eq(customers.assignedTeamMemberId, id)
+    ),
   ]);
 
   return {
     ...member,
+    _count: { assignedCustomers: assignedCustomers[0]?.count || 0 },
     activeLeads: activeLeads[0]?.count || 0,
     convertedLeads: convertedLeads[0]?.count || 0,
-    paymentsReceived: paymentsReceived[0]?.total || 0,
+    paymentsReceived: Number(paymentsReceived[0]?.total || 0),
   };
 }
 

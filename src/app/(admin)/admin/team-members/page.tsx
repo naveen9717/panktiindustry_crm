@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getDb } from "@/lib/db/local";
 import { getCurrentUser } from "@/lib/auth/session";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { TeamMembersTable } from "@/components/team-members/team-members-table";
@@ -16,6 +17,7 @@ interface PageProps {
 
 export default async function TeamMembersPage({ searchParams }: PageProps) {
   const user = await getCurrentUser();
+  const db = await getDb();
 
   if (!user) {
     redirect("/login");
@@ -30,7 +32,7 @@ export default async function TeamMembersPage({ searchParams }: PageProps) {
   const search = params.search || "";
   const status = params.status || "";
 
-  const data = await getTeamMembers({
+  const data = await getTeamMembers({ db, 
     page,
     pageSize: 10,
     search,

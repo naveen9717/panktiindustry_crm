@@ -5,7 +5,7 @@ import { SettingsPage } from "@/components/settings/settings-page";
 
 export const dynamic = "force-dynamic";
 
-export default async function TeamSettingsPage() {
+export default async function TeamSettings() {
   const user = await getCurrentUser();
 
   if (!user) {

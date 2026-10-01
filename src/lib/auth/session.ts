@@ -1,6 +1,6 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-import type { DB } from "@/db";
+import { getDb } from "@/lib/db/local";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
@@ -75,10 +75,11 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   return verifySessionToken(token);
 }
 
-export async function getCurrentUser(db: DB) {
+export async function getCurrentUser() {
   const session = await getSessionUser();
   if (!session) return null;
 
+  const db = await getDb();
   const user = await db.query.users.findFirst({
     where: eq(users.id, session.id),
     columns: {
@@ -100,16 +101,16 @@ export async function getCurrentUser(db: DB) {
   return user;
 }
 
-export async function requireUser(db: DB) {
-  const user = await getCurrentUser(db);
+export async function requireUser() {
+  const user = await getCurrentUser();
   if (!user) {
     throw new Error("Unauthorized");
   }
   return user;
 }
 
-export async function requireAdmin(db: DB) {
-  const user = await requireUser(db);
+export async function requireAdmin() {
+  const user = await requireUser();
   if (user.role !== "MASTER_ADMIN") {
     throw new Error("Forbidden");
   }

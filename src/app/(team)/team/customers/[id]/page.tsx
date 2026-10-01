@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
+import { getDb } from "@/lib/db/local";
 import { TeamLayout } from "@/components/layout/team-layout";
 import { TeamCustomerDetail } from "@/components/customers/team-customer-detail";
 import { getCustomerById } from "@/lib/services/customer";
@@ -12,6 +13,7 @@ export default async function TeamCustomerDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const user = await getCurrentUser();
+  const db = await getDb();
 
   if (!user) {
     redirect("/login");
@@ -22,7 +24,7 @@ export default async function TeamCustomerDetailPage({
   }
 
   const { id } = await params;
-  const customer = await getCustomerById(id, user.id, user.role);
+  const customer = await getCustomerById(db, id, user.id, user.role);
 
   if (!customer) {
     notFound();

@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
 import { CustomerFormDialog } from "./customer-form-dialog";
 import { DeleteCustomerDialog } from "./delete-customer-dialog";
-import { ArrowLeft, Pencil, Trash2, Mail, Phone, MapPin, Calendar, User, CreditCard, FileText } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, Mail, Phone, MapPin, Calendar, CreditCard, FileText } from "lucide-react";
 import type { Customer, User, Payment, ActivityLog } from "@/db/schema";
 
 type ActivityLogWithUser = ActivityLog & {

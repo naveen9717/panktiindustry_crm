@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createDb } from "@/db";
+import { getDb } from "@/lib/db/local";
 import { getCurrentUser } from "@/lib/auth/session";
 import { updateCustomer, deleteCustomer, updateCustomerRemarks, updateCustomerStatus, assignCustomer, getCustomerById } from "@/lib/services/customer";
 import { updateCustomerSchema, updateCustomerRemarksSchema, updateCustomerStatusSchema, assignCustomerSchema } from "@/lib/validations/customer";
@@ -8,8 +8,8 @@ type RouteContext = { params: Promise<{ id: string }> };
 
 export async function GET(request: NextRequest, context: RouteContext) {
   try {
-    const db = createDb(request.cookies.get("DB") as unknown as D1Database);
-    const user = await getCurrentUser(db);
+    const db = await getDb();
+    const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -30,8 +30,8 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
 export async function PUT(request: NextRequest, context: RouteContext) {
   try {
-    const db = createDb(request.cookies.get("DB") as unknown as D1Database);
-    const user = await getCurrentUser(db);
+    const db = await getDb();
+    const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -46,7 +46,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
         return NextResponse.json({ error: "Validation failed", details: validated.error.flatten() }, { status: 400 });
       }
       const ip = request.headers.get("x-forwarded-for") || null;
-      await updateCustomerRemarks({ db, id, remarks: validated.data.remarks, userId: user.id, ipAddress: ip });
+      await updateCustomerRemarks({ db, id, remarks: validated.data.remarks ?? "", userId: user.id, ipAddress: ip });
       return NextResponse.json({ success: true });
     }
 
@@ -111,8 +111,8 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
 export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
-    const db = createDb(request.cookies.get("DB") as unknown as D1Database);
-    const user = await getCurrentUser(db);
+    const db = await getDb();
+    const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

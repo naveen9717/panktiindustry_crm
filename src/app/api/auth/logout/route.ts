@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { removeSessionCookie, getSessionUser } from "@/lib/auth/session";
 import { logActivity } from "@/lib/services/activity";
-import { createDb } from "@/db";
+import { getDb } from "@/lib/db/local";
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getSessionUser();
     if (session) {
-      const db = createDb(request.cookies.get("DB") as unknown as D1Database);
+      const db = await getDb();
       const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || null;
       await logActivity({
         db,

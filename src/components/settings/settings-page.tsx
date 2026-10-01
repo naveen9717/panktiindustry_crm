@@ -70,7 +70,7 @@ export function SettingsPage({ user, isAdmin }: SettingsPageProps) {
     },
   });
 
-  const onProfileSubmit = async (data: { firstName: string; lastName: string; phone: string }) => {
+  const onProfileSubmit = async (data: { firstName: string; lastName: string; phone?: string }) => {
     setProfileLoading(true);
     try {
       const res = await fetch("/api/settings/profile", {

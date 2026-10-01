@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import type { ColumnDef } from "@tanstack/react-table";
+import type { LegacyColumnDef as ColumnDef } from "@tanstack/react-table/legacy";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { Badge, getUserStatusBadgeVariant } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -56,7 +56,7 @@ export function TeamMembersTable({ members, total, page, pageSize, totalPages, c
     router.push(`/admin/team-members?${params.toString()}`);
   };
 
-  const columns: ColumnDef<TeamMemberWithStats>[] = [
+  const columns: ColumnDef<TeamMemberWithStats, any>[] = [
     {
       accessorKey: "name",
       header: "Name",

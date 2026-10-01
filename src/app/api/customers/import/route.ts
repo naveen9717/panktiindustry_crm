@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createDb } from "@/db";
+import { getDb } from "@/lib/db/local";
 import { getCurrentUser } from "@/lib/auth/session";
 import { parseCsvContent, importCustomers, detectColumnMappings } from "@/lib/services/csv";
 
 export async function POST(request: NextRequest) {
   try {
-    const db = createDb(request.cookies.get("DB") as unknown as D1Database);
-    const user = await getCurrentUser(db);
+    const db = await getDb();
+    const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getDb } from "@/lib/db/local";
 import { getCurrentUser } from "@/lib/auth/session";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { CustomersTable } from "@/components/customers/customers-table";
@@ -24,6 +25,7 @@ interface PageProps {
 
 export default async function CustomersPage({ searchParams }: PageProps) {
   const user = await getCurrentUser();
+  const db = await getDb();
 
   if (!user) {
     redirect("/login");
@@ -47,6 +49,7 @@ export default async function CustomersPage({ searchParams }: PageProps) {
 
   const [customersData, teamMembers] = await Promise.all([
     getCustomers({
+      db,
       page,
       pageSize: 10,
       search,
@@ -59,7 +62,7 @@ export default async function CustomersPage({ searchParams }: PageProps) {
       sortBy,
       sortOrder,
     }),
-    getActiveTeamMembers(),
+    getActiveTeamMembers(db),
   ]);
 
   return (

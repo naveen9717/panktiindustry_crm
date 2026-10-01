@@ -2,21 +2,23 @@
 
 import * as React from "react";
 import {
-  useReactTable,
+  flexRender,
+  type SortingState,
+  type RowData,
+} from "@tanstack/react-table";
+import {
+  useLegacyTable,
   getCoreRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   getFilteredRowModel,
-  flexRender,
-  type ColumnDef,
-  type SortingState,
-} from "@tanstack/react-table";
+  type LegacyColumnDef as ColumnDef,
+} from "@tanstack/react-table/legacy";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData extends RowData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   searchPlaceholder?: string;
@@ -28,13 +30,13 @@ interface DataTableProps<TData, TValue> {
   totalPages?: number;
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends RowData, TValue>({
   columns,
   data,
   searchPlaceholder = "Search...",
   searchKey,
   totalItems,
-  pageSize = 10,
+  pageSize = 25,
   onPageChange,
   currentPage = 1,
   totalPages = 1,
@@ -42,19 +44,18 @@ export function DataTable<TData, TValue>({
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = React.useState("");
 
-  const table = useReactTable({
+  const table = useLegacyTable({
     data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onSortingChange: setSorting,
-    onGlobalFilterChange: setGlobalFilter,
+    columns: columns as ColumnDef<TData, any>[],
     state: {
       sorting,
       globalFilter,
     },
+    onSortingChange: setSorting,
+    onGlobalFilterChange: setGlobalFilter,
+    getCoreRowModel: getCoreRowModel<TData>(),
+    getSortedRowModel: getSortedRowModel<TData>(),
+    getFilteredRowModel: getFilteredRowModel<TData>(),
     manualPagination: true,
     pageCount: totalPages,
   });

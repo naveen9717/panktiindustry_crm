@@ -33,7 +33,7 @@ export async function createPayment({ db, data, teamMemberId, userId, ipAddress 
     teamMemberId,
     amount: data.amount,
     paymentDate: data.paymentDate || new Date(),
-    paymentMode: data.paymentMode as typeof payments.$inferInsert.paymentMode,
+    paymentMode: data.paymentMode as typeof payments.$inferSelect.paymentMode,
     paymentStatus: data.paymentStatus as typeof payments.$inferInsert.paymentStatus,
     transactionId: data.transactionId || null,
     remarks: data.remarks || null,
@@ -150,25 +150,23 @@ export async function getPayments({
   }
 
   if (search) {
-    conditions.push(
-      or(
+    conditions.push(or(
         like(customers.name, `%${search}%`),
         like(customers.email, `%${search}%`),
         like(payments.transactionId, `%${search}%`),
         like(payments.id, `%${search}%`)
-      )
-    );
+      )!);
   }
 
   if (paymentStatus) conditions.push(eq(payments.paymentStatus, paymentStatus as typeof payments.$inferSelect.paymentStatus));
-  if (paymentMode) conditions.push(eq(payments.paymentMode, paymentMode as typeof payments.$inferInsert.paymentMode));
+  if (paymentMode) conditions.push(eq(payments.paymentMode, paymentMode as typeof payments.$inferSelect.paymentMode));
   if (customerId) conditions.push(eq(payments.customerId, customerId));
 
   if (dateFrom) {
-    conditions.push(sql`${payments.paymentDate} >= ${new Date(dateFrom)}`);
+    conditions.push(sql`${payments.paymentDate} >= ${Math.floor(new Date(dateFrom).getTime() / 1000)}`);
   }
   if (dateTo) {
-    conditions.push(sql`${payments.paymentDate} <= ${new Date(dateTo)}`);
+    conditions.push(sql`${payments.paymentDate} <= ${Math.floor(new Date(dateTo).getTime() / 1000)}`);
   }
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -230,10 +228,10 @@ export async function getPaymentStats(db: DB, userId?: string, userRole?: string
     ]);
 
   return {
-    totalAmount: totalAmount[0]?.total || 0,
-    receivedAmount: receivedAmount[0]?.total || 0,
-    pendingAmount: pendingAmount[0]?.total || 0,
-    partialAmount: partialAmount[0]?.total || 0,
+    totalAmount: Number(totalAmount[0]?.total || 0),
+    receivedAmount: Number(receivedAmount[0]?.total || 0),
+    pendingAmount: Number(pendingAmount[0]?.total || 0),
+    partialAmount: Number(partialAmount[0]?.total || 0),
     totalCount: totalCount[0]?.count || 0,
     paidCount: paidCount[0]?.count || 0,
     pendingCount: pendingCount[0]?.count || 0,
@@ -259,7 +257,7 @@ export async function getPaymentsOverTime(db: DB, userId?: string, userRole?: st
     .where(
       and(
         ...(conditions.length > 0 ? conditions : []),
-        sql`${payments.paymentDate} >= ${startDate}`
+        sql`${payments.paymentDate} >= ${Math.floor(startDate.getTime() / 1000)}`
       )
     )
     .orderBy(asc(payments.paymentDate));

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createDb } from "@/db";
+import { getDb } from "@/lib/db/local";
 import { getCurrentUser } from "@/lib/auth/session";
 import { updateTeamMember, deleteTeamMember } from "@/lib/services/team-member";
 import { updateTeamMemberSchema, deleteTeamMemberSchema } from "@/lib/validations/team-member";
@@ -8,8 +8,8 @@ type RouteContext = { params: Promise<{ id: string }> };
 
 export async function PUT(request: NextRequest, context: RouteContext) {
   try {
-    const db = createDb(request.cookies.get("DB") as unknown as D1Database);
-    const user = await getCurrentUser(db);
+    const db = await getDb();
+    const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -55,8 +55,8 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
 export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
-    const db = createDb(request.cookies.get("DB") as unknown as D1Database);
-    const user = await getCurrentUser(db);
+    const db = await getDb();
+    const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

@@ -1,4 +1,5 @@
 import { sqliteTable, text, integer, real, index } from "drizzle-orm/sqlite-core";
+import { relations } from "drizzle-orm";
 
 export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
@@ -122,6 +123,86 @@ export const passwordResets = sqliteTable("password_resets", {
   usedAt: integer("used_at", { mode: "timestamp" }),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 });
+
+export const usersRelations = relations(users, ({ many }) => ({
+  assignedCustomers: many(customers, { relationName: "assignedCustomers" }),
+  createdCustomers: many(customers, { relationName: "createdCustomers" }),
+  updatedCustomers: many(customers, { relationName: "updatedCustomers" }),
+  payments: many(payments, { relationName: "teamMemberPayments" }),
+  remarks: many(customerRemarks),
+  activityLogs: many(activityLogs),
+  passwordResets: many(passwordResets),
+}));
+
+export const customersRelations = relations(customers, ({ one, many }) => ({
+  assignedTeamMember: one(users, {
+    relationName: "assignedCustomers",
+    fields: [customers.assignedTeamMemberId],
+    references: [users.id],
+  }),
+  createdBy: one(users, {
+    relationName: "createdCustomers",
+    fields: [customers.createdById],
+    references: [users.id],
+  }),
+  updatedBy: one(users, {
+    relationName: "updatedCustomers",
+    fields: [customers.updatedById],
+    references: [users.id],
+  }),
+  payments: many(payments, { relationName: "customerPayments" }),
+  remarks: many(customerRemarks),
+  activityLogs: many(activityLogs),
+}));
+
+export const paymentsRelations = relations(payments, ({ one }) => ({
+  customer: one(customers, {
+    relationName: "customerPayments",
+    fields: [payments.customerId],
+    references: [customers.id],
+  }),
+  teamMember: one(users, {
+    relationName: "teamMemberPayments",
+    fields: [payments.teamMemberId],
+    references: [users.id],
+  }),
+}));
+
+export const customerRemarksRelations = relations(customerRemarks, ({ one }) => ({
+  customer: one(customers, {
+    fields: [customerRemarks.customerId],
+    references: [customers.id],
+  }),
+  user: one(users, {
+    fields: [customerRemarks.userId],
+    references: [users.id],
+  }),
+}));
+
+export const activityLogsRelations = relations(activityLogs, ({ one }) => ({
+  user: one(users, {
+    fields: [activityLogs.userId],
+    references: [users.id],
+  }),
+  customer: one(customers, {
+    fields: [activityLogs.customerId],
+    references: [customers.id],
+  }),
+}));
+
+export const leadImportsRelations = relations(leadImports, ({ one }) => ({
+  importedByUser: one(users, {
+    fields: [leadImports.importedBy],
+    references: [users.id],
+  }),
+}));
+
+export const passwordResetsRelations = relations(passwordResets, ({ one }) => ({
+  user: one(users, {
+    fields: [passwordResets.userId],
+    references: [users.id],
+  }),
+}));
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;

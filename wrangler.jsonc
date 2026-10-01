@@ -9,13 +9,13 @@
     "binding": "ASSETS"
   },
   "vars": {
-    "AUTH_SECRET": "change-this-in-production"
+    "NEXT_PUBLIC_APP_URL": "https://crm-panktiindustry.arenapixels.workers.dev"
   },
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "crm-panktiindustry",
-      "database_id": "local-crm-panktiindustry"
+      "database_id": "a4459f3b-02a1-4bfa-ba2c-4da576123e42"
     }
   ],
   "observability": {

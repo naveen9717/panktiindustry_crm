@@ -75,7 +75,7 @@ export function TeamCustomerDetail({ customer, user }: TeamCustomerDetailProps) 
     .filter((p) => p.paymentStatus === "PENDING")
     .reduce((sum, p) => sum + Number(p.amount), 0);
 
-  const onRemarksSubmit = async (data: { remarks: string }) => {
+  const onRemarksSubmit = async (data: { remarks?: string }) => {
     setLoading(true);
     try {
       const res = await fetch(`/api/customers/${customer.id}`, {

@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getDb } from "@/lib/db/local";
 import { getCurrentUser } from "@/lib/auth/session";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { PaymentsTable } from "@/components/payments/payments-table";
@@ -21,6 +22,7 @@ interface PageProps {
 
 export default async function PaymentsPage({ searchParams }: PageProps) {
   const user = await getCurrentUser();
+  const db = await getDb();
 
   if (!user) {
     redirect("/login");
@@ -41,6 +43,7 @@ export default async function PaymentsPage({ searchParams }: PageProps) {
 
   const [paymentsData, stats, teamMembers] = await Promise.all([
     getPayments({
+      db,
       page,
       pageSize: 10,
       search,
@@ -50,8 +53,8 @@ export default async function PaymentsPage({ searchParams }: PageProps) {
       dateFrom,
       dateTo,
     }),
-    getPaymentStats(),
-    getActiveTeamMembers(),
+    getPaymentStats(db),
+    getActiveTeamMembers(db),
   ]);
 
   return (

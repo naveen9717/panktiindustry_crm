@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getDb } from "@/lib/db/local";
 import { getCurrentUser } from "@/lib/auth/session";
 import { TeamLayout } from "@/components/layout/team-layout";
 import { TeamPaymentsTable } from "@/components/payments/team-payments-table";
@@ -16,6 +17,7 @@ interface PageProps {
 
 export default async function TeamPaymentsPage({ searchParams }: PageProps) {
   const user = await getCurrentUser();
+  const db = await getDb();
 
   if (!user) {
     redirect("/login");
@@ -32,6 +34,7 @@ export default async function TeamPaymentsPage({ searchParams }: PageProps) {
 
   const [paymentsData, stats] = await Promise.all([
     getPayments({
+      db,
       page,
       pageSize: 10,
       search,
@@ -39,7 +42,7 @@ export default async function TeamPaymentsPage({ searchParams }: PageProps) {
       userId: user.id,
       userRole: user.role,
     }),
-    getPaymentStats(user.id, user.role),
+    getPaymentStats(db, user.id, user.role),
   ]);
 
   return (

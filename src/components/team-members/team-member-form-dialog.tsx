@@ -68,7 +68,7 @@ export function TeamMemberFormDialog({ open, onOpenChange, member }: TeamMemberF
         password: "",
         confirmPassword: "",
         role: member.role,
-        status: member.status,
+        status: member.status === "DELETED" ? "INACTIVE" : member.status,
       });
     } else {
       reset({

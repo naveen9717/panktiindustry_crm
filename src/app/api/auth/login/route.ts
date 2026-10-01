@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createDb } from "@/db";
+import { getDb } from "@/lib/db/local";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { verifyPassword } from "@/lib/auth/password";
@@ -9,7 +9,7 @@ import { loginSchema } from "@/lib/validations/auth";
 
 export async function POST(request: NextRequest) {
   try {
-    const db = createDb(request.cookies.get("DB") as unknown as D1Database);
+    const db = await getDb();
     const body = await request.json();
     const validated = loginSchema.safeParse(body);
 

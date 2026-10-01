@@ -8,16 +8,18 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import { Badge, getLeadStatusBadgeVariant, getPaymentStatusBadgeVariant } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
+import { getDb } from "@/lib/db/local";
 
 export async function TeamMemberDashboard({ user }: { user: { id: string; firstName: string; lastName: string; email: string; role: string } }) {
+  const db = await getDb();
   const [stats, recentLeads, recentPayments, leadsOverTime, customerStats, paymentsOverTime] =
     await Promise.all([
-      getTeamMemberDashboardStats(user.id),
-      getRecentLeads(5, user.id, user.role),
-      getRecentPayments(5, user.id, user.role),
-      getLeadsOverTime(user.id, user.role),
-      getCustomerStats(user.id, user.role),
-      getPaymentsOverTime(user.id, user.role),
+      getTeamMemberDashboardStats({ db, userId: user.id, userRole: user.role }),
+      getRecentLeads(db, 5, user.id, user.role),
+      getRecentPayments(db, 5, user.id, user.role),
+      getLeadsOverTime(db, user.id, user.role),
+      getCustomerStats(db, user.id, user.role),
+      getPaymentsOverTime(db, user.id, user.role),
     ]);
 
   const statusChartData = Object.entries(customerStats.byStatus)

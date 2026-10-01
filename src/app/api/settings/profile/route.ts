@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createDb } from "@/db";
+import { getDb } from "@/lib/db/local";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -8,8 +8,8 @@ import { updateProfileSchema } from "@/lib/validations/team-member";
 
 export async function PUT(request: NextRequest) {
   try {
-    const db = createDb(request.cookies.get("DB") as unknown as D1Database);
-    const user = await getCurrentUser(db);
+    const db = await getDb();
+    const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
