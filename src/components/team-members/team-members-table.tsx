@@ -12,7 +12,8 @@ import { Select } from "@/components/ui/select";
 import { DataTable } from "@/components/tables/data-table";
 import { TeamMemberFormDialog } from "./team-member-form-dialog";
 import { DeleteTeamMemberDialog } from "./delete-team-member-dialog";
-import { Plus, Eye, Pencil, Trash2, Users, CreditCard, UserCheck } from "lucide-react";
+import { ResetPasswordDialog } from "./reset-password-dialog";
+import { Plus, Eye, Pencil, Trash2, Users, CreditCard, UserCheck, Key } from "lucide-react";
 import type { User } from "@/db/schema";
 
 type TeamMemberWithStats = Pick<User, "id" | "firstName" | "lastName" | "email" | "phone" | "role" | "status" | "profileImage" | "lastLoginAt" | "createdAt" | "updatedAt"> & {
@@ -39,6 +40,7 @@ export function TeamMembersTable({ members, total, page, pageSize, totalPages, c
   const searchParams = useSearchParams();
   const [showAddDialog, setShowAddDialog] = React.useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
+  const [showResetDialog, setShowResetDialog] = React.useState(false);
   const [selectedMember, setSelectedMember] = React.useState<TeamMemberWithStats | null>(null);
 
   const updateParams = (updates: Record<string, string>) => {
@@ -137,6 +139,17 @@ export function TeamMembersTable({ members, total, page, pageSize, totalPages, c
           <Button
             variant="ghost"
             size="icon"
+            className="h-8 w-8"
+            onClick={() => {
+              setSelectedMember(row.original);
+              setShowResetDialog(true);
+            }}
+          >
+            <Key className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
             className="h-8 w-8 text-red-600 hover:text-red-700"
             onClick={() => {
               setSelectedMember(row.original);
@@ -211,6 +224,11 @@ export function TeamMembersTable({ members, total, page, pageSize, totalPages, c
       <DeleteTeamMemberDialog
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
+        member={selectedMember}
+      />
+      <ResetPasswordDialog
+        open={showResetDialog}
+        onOpenChange={setShowResetDialog}
         member={selectedMember}
       />
     </div>

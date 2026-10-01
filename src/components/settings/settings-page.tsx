@@ -124,7 +124,7 @@ export function SettingsPage({ user, isAdmin }: SettingsPageProps) {
     { id: "profile" as const, label: "Profile", icon: <User className="h-4 w-4" /> },
     { id: "security" as const, label: "Security", icon: <Key className="h-4 w-4" /> },
     { id: "account" as const, label: "Account", icon: <Shield className="h-4 w-4" /> },
-  ];
+  ].filter((tab) => tab.id !== "security" || isAdmin);
 
   return (
     <div className="space-y-6">
