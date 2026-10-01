@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { Bebas_Neue, Inter } from "next/font/google";
+import { Bebas_Neue, Geist } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 const bebasNeue = Bebas_Neue({
   weight: "400",
   subsets: ["latin"],
@@ -30,7 +30,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} ${bebasNeue.variable}`}>
+      <body className={`${geist.variable} ${bebasNeue.variable}`}>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         {children}
         <Toaster position="top-right" richColors />

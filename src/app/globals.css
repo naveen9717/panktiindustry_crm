@@ -4,13 +4,41 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-geist), system-ui, -apple-system, sans-serif;
+}
+
+/* Reference palette (wedding-crm-silk): warm cream body, Geist type */
+:root {
+  --popup-bg: #ffffff;
+  --popup-border: rgb(228 228 231);
 }
 
 body {
-  @apply bg-slate-50 text-slate-900 antialiased;
+  @apply antialiased;
+  font-family: var(--font-geist), system-ui, -apple-system, sans-serif;
+  background-color: #f8f4ed;
+  color: #1c1917;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+/* Placeholders (reference: stone-400 light / white 30% dark) */
+::placeholder {
+  opacity: 1;
+  color: #9ca3af;
+}
+.dark ::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* Checkbox / radio accent (reference: wine light, rose dark) */
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: #6b1f2e;
+}
+.dark input[type="checkbox"],
+.dark input[type="radio"] {
+  accent-color: #c73659;
 }
 /* Form controls don't inherit text-transform (UA default) — force it */
 button,
@@ -23,15 +51,32 @@ option {
 }
 
 /* ------------------------------------------------------------------ */
-/* All surfaces take the page background color so elements blend into  */
-/* the bg (both modes). Hovers re-declared unlayered so they still win */
-/* over the .bg-white rule (layered utilities would lose to it).       */
+/* Surfaces take the page background color so elements blend into the   */
+/* bg (both modes). Light = reference cream (#f8f4ed) + stone palette;  */
+/* hovers re-declared unlayered so they still win over the .bg-white    */
+/* rule (layered utilities would lose to it).                           */
 /* ------------------------------------------------------------------ */
 .bg-white {
-  background-color: rgba(248, 250, 252, 0.9);
+  background-color: rgba(253, 251, 247, 0.9);
 }
-.hover\:bg-slate-50:hover { background-color: #eef2f7; }
-.hover\:bg-slate-100:hover { background-color: #f1f5f9; }
+.hover\:bg-slate-50:hover { background-color: #f5f5f4; }
+.hover\:bg-slate-100:hover { background-color: #ebe9e2; }
+
+/* Stone borders (reference: stone-100/200/300) */
+.border-slate-100 { border-color: #f5f5f4; }
+.border-slate-200 { border-color: #e7e5e4; }
+.border-slate-300 { border-color: #d6d3d1; }
+
+/* Stone text (reference: stone-900…400) */
+.text-slate-950,
+.text-slate-900 { color: #1c1917; }
+.text-slate-800,
+.text-slate-700 { color: #292524; }
+.text-slate-600 { color: #57534e; }
+.text-slate-500 { color: #78716c; }
+.text-slate-400 { color: #a8a29e; }
+.hover\:text-slate-900:hover { color: #1c1917; }
+.hover\:text-slate-600:hover { color: #57534e; }
 
 /* ------------------------------------------------------------------ */
 /* Dark palette remap: applies the slate/neutral + status tokens used   */
@@ -43,6 +88,8 @@ option {
 /* ------------------------------------------------------------------ */
 .dark {
   color-scheme: dark;
+  --popup-bg: #1c1917;
+  --popup-border: rgba(255, 255, 255, 0.1);
 }
 
 /* Surfaces → the page background color (with a faint sheen) */
@@ -75,11 +122,6 @@ option {
 .dark .border-slate-200 { border-color: rgba(255, 255, 255, 0.1); }
 .dark .border-slate-300 { border-color: rgba(255, 255, 255, 0.2); }
 
-/* Scrollbars (theirs: thumb #ffffff1f, hover #ffffff38, transparent track) */
-.dark ::-webkit-scrollbar-track { background: transparent; }
-.dark ::-webkit-scrollbar-thumb { background: #ffffff1f; border-radius: 99px; }
-.dark ::-webkit-scrollbar-thumb:hover { background: #ffffff38; }
-
 /* Status / tinted backgrounds → translucent dark tints */
 .dark .bg-red-50,
 .dark .bg-red-100 { background-color: rgb(127 29 29 / 0.35); }
@@ -108,19 +150,14 @@ option {
 .dark .text-orange-600 { color: #fb923c; }
 
 /* ================================================================== */
-/* Modern gradient UI system                                           */
-/* Light: indigo/rose mesh · Dark: true-black gradients w/ soft glow   */
-/* Brand accents: indigo → violet → rose                               */
+/* Gradient UI system                                                  */
+/* Light: reference cream #f8f4ed + stone surfaces · Dark: wine→navy   */
+/* radial gradients (palette taken from wedding-crm-silk)              */
 /* ================================================================== */
 
-/* ---- Page background ---- */
+/* ---- Page background (reference: flat warm cream) ---- */
 .bg-page {
-  background-color: #f8fafc;
-  background-image:
-    radial-gradient(1000px 550px at 8% -8%, rgba(99, 102, 241, 0.14), transparent 60%),
-    radial-gradient(900px 500px at 100% 0%, rgba(244, 63, 94, 0.1), transparent 55%),
-    radial-gradient(850px 750px at 55% 115%, rgba(168, 85, 247, 0.1), transparent 60%),
-    linear-gradient(160deg, #f8fafc 0%, #eef2ff 55%, #fdf2f8 100%);
+  background-color: #f8f4ed;
 }
 .dark body {
   background-color: #0f0e17;
@@ -135,8 +172,8 @@ option {
 
 /* ---- Header (glass) ---- */
 .surface-header {
-  background-color: rgba(248, 250, 252, 0.85);
-  background-image: linear-gradient(90deg, rgba(248, 250, 252, 0.92), rgba(240, 244, 255, 0.8) 60%, rgba(253, 240, 248, 0.8));
+  background-color: rgba(248, 244, 237, 0.85);
+  background-image: linear-gradient(90deg, rgba(248, 244, 237, 0.92), rgba(250, 247, 241, 0.85) 60%, rgba(252, 246, 240, 0.82));
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
@@ -147,8 +184,8 @@ option {
 
 /* ---- Sidebar ---- */
 .surface-sidebar {
-  background-color: rgba(248, 250, 252, 0.92);
-  background-image: linear-gradient(180deg, rgba(248, 250, 252, 0.95) 0%, rgba(246, 247, 253, 0.9) 100%);
+  background-color: rgba(248, 244, 237, 0.94);
+  background-image: linear-gradient(180deg, rgba(253, 251, 247, 0.95) 0%, rgba(248, 244, 237, 0.9) 100%);
 }
 .dark .surface-sidebar {
   background-color: #0d0c1a;
@@ -161,15 +198,13 @@ h1 {
   font-family: var(--font-bebas, "Bebas Neue"), ui-sans-serif, system-ui, sans-serif;
 }
 
-/* ---- Brand gradient text ---- */
+/* ---- Brand text (reference light: wine #6B1F2E) ---- */
 .brand-text {
-  background-image: linear-gradient(135deg, #6366f1 0%, #a855f7 55%, #f43f5e 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  background-image: none;
+  color: #6b1f2e;
 }
 
-/* Dark mode: plain white instead of the gradient (readable on true-black) */
+/* Dark mode: plain white instead of the wine (readable on true-black) */
 .dark .brand-text {
   background-image: none;
   color: #ffffff;
@@ -206,16 +241,16 @@ h1 {
 
 /* ---- Cards: soft elevation + subtle sheen ---- */
 .card-elevated {
-  background-image: linear-gradient(180deg, rgba(238, 242, 255, 0.65), rgba(255, 255, 255, 0) 45%);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0) 45%);
   box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.05),
-    0 10px 30px -18px rgba(99, 102, 241, 0.45);
+    0 1px 2px rgba(28, 25, 23, 0.05),
+    0 10px 30px -18px rgba(107, 31, 46, 0.35);
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 .card-elevated:hover {
   box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.06),
-    0 18px 44px -20px rgba(124, 58, 237, 0.5);
+    0 1px 2px rgba(28, 25, 23, 0.06),
+    0 18px 44px -20px rgba(107, 31, 46, 0.4);
 }
 .dark .card-elevated {
   background-image: linear-gradient(160deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.015) 50%, transparent);
@@ -266,16 +301,17 @@ h1 {
 
 /* ---- Recharts text (ticks + pie labels) ---- */
 .recharts-wrapper text {
-  fill: #475569;
+  fill: #57534e;
 }
 .dark .recharts-wrapper text {
   fill: #a3a3a3;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar (reference: 5px, transparent track,
+   thumb #0000001f light / #ffffff1f dark) */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -283,16 +319,17 @@ h1 {
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-300 rounded-full;
+  background: #0000001f;
+  border-radius: 99px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-slate-400;
+  background: #00000038;
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: #333333;
+  background: #ffffff1f;
 }
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: #4d4d4d;
+  background: #ffffff38;
 }
