@@ -44,7 +44,7 @@ export function KpiCard({ title, value, icon, change, changeLabel, iconClassName
               </div>
             )}
           </div>
-          <div className={cn("flex h-12 w-12 items-center justify-center rounded-xl", iconClassName)}>
+          <div className={cn("kpi-tile flex h-12 w-12 items-center justify-center rounded-xl", iconClassName)}>
             {icon}
           </div>
         </div>

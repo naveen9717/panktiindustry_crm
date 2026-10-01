@@ -43,7 +43,7 @@ export function Sidebar({ user, navItems, isCollapsed, onToggle, onLogout }: Sid
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 z-40 flex h-screen flex-col border-r border-slate-200 bg-white transition-all duration-300",
+        "surface-sidebar fixed left-0 top-0 z-40 flex h-screen flex-col border-r border-slate-200 bg-white transition-all duration-300",
         isCollapsed ? "w-16" : "w-64"
       )}
     >
@@ -51,8 +51,8 @@ export function Sidebar({ user, navItems, isCollapsed, onToggle, onLogout }: Sid
       <div className="flex h-16 items-center justify-between border-b border-slate-200 px-4">
         {!isCollapsed && (
           <div className="flex items-center gap-2">
-            <Building2 className="h-6 w-6 text-slate-900" />
-            <span className="text-lg font-bold text-slate-900">CRM</span>
+            <Building2 className="h-6 w-6 text-indigo-600" />
+            <span className="brand-text text-lg font-bold">CRM</span>
           </div>
         )}
         <Button variant="ghost" size="icon" onClick={onToggle} className="h-8 w-8">
@@ -71,7 +71,7 @@ export function Sidebar({ user, navItems, isCollapsed, onToggle, onLogout }: Sid
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-slate-900 text-white"
+                  ? "nav-active-gradient"
                   : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
               )}
               title={isCollapsed ? item.label : undefined}

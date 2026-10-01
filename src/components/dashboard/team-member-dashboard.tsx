@@ -45,31 +45,31 @@ export async function TeamMemberDashboard({ user }: { user: { id: string; firstN
           title="My Customers"
           value={stats.myCustomers}
           icon={<Users className="h-6 w-6 text-blue-600" />}
-          iconClassName="bg-blue-50"
+          iconClassName="kpi-tile-blue"
         />
         <KpiCard
           title="Active Leads"
           value={stats.activeLeads}
           icon={<Target className="h-6 w-6 text-amber-600" />}
-          iconClassName="bg-amber-50"
+          iconClassName="kpi-tile-amber"
         />
         <KpiCard
           title="Converted"
           value={stats.convertedLeads}
           icon={<TrendingUp className="h-6 w-6 text-emerald-600" />}
-          iconClassName="bg-emerald-50"
+          iconClassName="kpi-tile-emerald"
         />
         <KpiCard
           title="Pending Payments"
           value={formatCurrency(stats.pendingPayments)}
           icon={<Clock className="h-6 w-6 text-orange-600" />}
-          iconClassName="bg-orange-50"
+          iconClassName="kpi-tile-orange"
         />
         <KpiCard
           title="Received"
           value={formatCurrency(stats.paymentsReceived)}
           icon={<IndianRupee className="h-6 w-6 text-emerald-600" />}
-          iconClassName="bg-emerald-50"
+          iconClassName="kpi-tile-emerald"
         />
       </div>
 

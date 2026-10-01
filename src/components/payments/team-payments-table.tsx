@@ -141,25 +141,25 @@ export function TeamPaymentsTable({
           title="Total Amount"
           value={formatCurrency(stats.totalAmount)}
           icon={<IndianRupee className="h-6 w-6 text-blue-600" />}
-          iconClassName="bg-blue-50"
+          iconClassName="kpi-tile-blue"
         />
         <KpiCard
           title="Received"
           value={formatCurrency(stats.receivedAmount)}
           icon={<CheckCircle className="h-6 w-6 text-emerald-600" />}
-          iconClassName="bg-emerald-50"
+          iconClassName="kpi-tile-emerald"
         />
         <KpiCard
           title="Pending"
           value={formatCurrency(stats.pendingAmount)}
           icon={<Clock className="h-6 w-6 text-amber-600" />}
-          iconClassName="bg-amber-50"
+          iconClassName="kpi-tile-amber"
         />
         <KpiCard
           title="Total Payments"
           value={stats.totalCount}
           icon={<CreditCard className="h-6 w-6 text-violet-600" />}
-          iconClassName="bg-violet-50"
+          iconClassName="kpi-tile-violet"
         />
       </div>
 

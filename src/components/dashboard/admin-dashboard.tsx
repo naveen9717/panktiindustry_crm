@@ -36,43 +36,43 @@ export async function AdminDashboard({ user }: { user: { id: string; firstName: 
           title="Total Leads"
           value={stats.totalLeads}
           icon={<Users className="h-6 w-6 text-blue-600" />}
-          iconClassName="bg-blue-50"
+          iconClassName="kpi-tile-blue"
         />
         <KpiCard
           title="Team Members"
           value={stats.totalTeamMembers}
           icon={<UserCheck className="h-6 w-6 text-emerald-600" />}
-          iconClassName="bg-emerald-50"
+          iconClassName="kpi-tile-emerald"
         />
         <KpiCard
           title="Active Leads"
           value={stats.activeLeads}
           icon={<Target className="h-6 w-6 text-amber-600" />}
-          iconClassName="bg-amber-50"
+          iconClassName="kpi-tile-amber"
         />
         <KpiCard
           title="Converted"
           value={stats.convertedLeads}
           icon={<TrendingUp className="h-6 w-6 text-violet-600" />}
-          iconClassName="bg-violet-50"
+          iconClassName="kpi-tile-violet"
         />
         <KpiCard
           title="Pending Payments"
           value={formatCurrency(stats.pendingPayments)}
           icon={<Clock className="h-6 w-6 text-orange-600" />}
-          iconClassName="bg-orange-50"
+          iconClassName="kpi-tile-orange"
         />
         <KpiCard
           title="Payments Received"
           value={formatCurrency(stats.paymentsReceived)}
           icon={<IndianRupee className="h-6 w-6 text-emerald-600" />}
-          iconClassName="bg-emerald-50"
+          iconClassName="kpi-tile-emerald"
         />
         <KpiCard
           title="Total Revenue"
           value={formatCurrency(stats.totalRevenue)}
           icon={<CreditCard className="h-6 w-6 text-blue-600" />}
-          iconClassName="bg-blue-50"
+          iconClassName="kpi-tile-blue"
         />
       </div>
 

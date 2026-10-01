@@ -70,11 +70,11 @@ export function LoginForm() {
   const from = searchParams.get("from");
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-page px-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <div className="mb-4 flex justify-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-900">
+            <div className="btn-gradient flex h-12 w-12 items-center justify-center rounded-xl">
               <Building2 className="h-6 w-6 text-white" />
             </div>
           </div>
@@ -84,7 +84,7 @@ export function LoginForm() {
           </p>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+        <div className="card-elevated rounded-xl border border-slate-200 bg-white p-8">
           {from && (
             <div className="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-700">
               Please sign in to access this page.

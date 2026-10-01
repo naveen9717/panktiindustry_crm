@@ -4,7 +4,7 @@ import { Building2 } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50">
+    <div className="flex min-h-screen items-center justify-center bg-page">
       <div className="text-center">
         <div className="mb-4 flex justify-center">
           <Building2 className="h-12 w-12 text-slate-400" />

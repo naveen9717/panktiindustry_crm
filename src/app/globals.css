@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Class-based dark mode (driven by next-themes, class on <html>) */
+/* Class-based dark mode (class on <html>, set by the inline theme script) */
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
@@ -9,16 +9,6 @@
 
 body {
   @apply bg-slate-50 text-slate-900 antialiased;
-}
-
-/* Page background (separate from bg-slate-50 which is used for inset panels) */
-.bg-page {
-  background-color: #f8fafc;
-}
-.dark body,
-.dark .bg-page {
-  background-color: #020617;
-  color: #e2e8f0;
 }
 
 /* ------------------------------------------------------------------ */
@@ -32,7 +22,10 @@ body {
 }
 
 /* Surfaces */
-.dark .bg-white { background-color: #0f172a; }
+.dark .bg-white {
+  background-color: #0f172a;
+  background-image: linear-gradient(160deg, rgba(99, 102, 241, 0.07), rgba(244, 63, 94, 0.03) 55%, transparent);
+}
 .dark .bg-slate-50 { background-color: #1e293b; }
 .dark .bg-slate-100,
 .dark .hover\:bg-slate-50:hover { background-color: #1e293b; }
@@ -81,8 +74,154 @@ body {
 .dark .text-amber-800 { color: #fbbf24; }
 .dark .text-blue-600,
 .dark .text-blue-700 { color: #60a5fa; }
+.dark .text-indigo-600 { color: #a5b4fc; }
 .dark .text-violet-600 { color: #a78bfa; }
 .dark .text-orange-600 { color: #fb923c; }
+
+/* ================================================================== */
+/* Modern gradient UI system                                           */
+/* Brand palette: indigo → violet → rose (matches the rose accents)    */
+/* ================================================================== */
+
+/* ---- Mesh page background ---- */
+.bg-page {
+  background-color: #f8fafc;
+  background-image:
+    radial-gradient(1000px 550px at 8% -8%, rgba(99, 102, 241, 0.14), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgba(244, 63, 94, 0.1), transparent 55%),
+    radial-gradient(850px 750px at 55% 115%, rgba(168, 85, 247, 0.1), transparent 60%),
+    linear-gradient(160deg, #f8fafc 0%, #eef2ff 55%, #fdf2f8 100%);
+}
+.dark body {
+  background-color: #020617;
+  color: #e2e8f0;
+}
+.dark .bg-page {
+  background-color: #020617;
+  color: #e2e8f0;
+  background-image:
+    radial-gradient(1000px 550px at 8% -8%, rgba(99, 102, 241, 0.26), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgba(244, 63, 94, 0.14), transparent 55%),
+    radial-gradient(900px 800px at 55% 115%, rgba(139, 92, 246, 0.22), transparent 60%),
+    linear-gradient(160deg, #020617 0%, #0b1224 55%, #150e33 100%);
+}
+
+/* ---- Glassy header ---- */
+.surface-header {
+  background-color: rgba(255, 255, 255, 0.85);
+  background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.92), rgba(240, 244, 255, 0.8) 60%, rgba(253, 240, 248, 0.8));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.dark .surface-header {
+  background-color: rgba(15, 23, 42, 0.8);
+  background-image: linear-gradient(90deg, rgba(15, 23, 42, 0.9), rgba(21, 17, 52, 0.85));
+}
+
+/* ---- Sidebar ---- */
+.surface-sidebar {
+  background-color: #ffffff;
+  background-image: linear-gradient(180deg, #ffffff 0%, #f6f7fd 100%);
+}
+.dark .surface-sidebar {
+  background-color: #0f172a;
+  background-image: linear-gradient(180deg, #0f172a 0%, #141038 100%);
+}
+
+/* ---- Brand gradient text ---- */
+.brand-text {
+  background-image: linear-gradient(135deg, #6366f1 0%, #a855f7 55%, #f43f5e 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---- Active nav pill ---- */
+.nav-active-gradient {
+  background-image: linear-gradient(135deg, #6366f1 0%, #8b5cf6 55%, #a855f7 100%);
+  background-color: #7c3aed;
+  color: #ffffff;
+  box-shadow: 0 6px 16px -8px rgba(124, 58, 237, 0.85);
+}
+
+/* ---- Primary buttons ---- */
+.btn-gradient {
+  background-color: #6366f1;
+  background-image: linear-gradient(135deg, #6366f1 0%, #8b5cf6 55%, #a855f7 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 14px -6px rgba(99, 102, 241, 0.75);
+  transition: filter 0.15s ease, box-shadow 0.15s ease;
+}
+.btn-gradient:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 6px 18px -6px rgba(124, 58, 237, 0.8);
+}
+.btn-gradient:active {
+  filter: brightness(0.94);
+}
+
+/* ---- Cards: soft tinted elevation + subtle sheen ---- */
+.card-elevated {
+  background-image: linear-gradient(180deg, rgba(238, 242, 255, 0.65), rgba(255, 255, 255, 0) 45%);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.05),
+    0 10px 30px -18px rgba(99, 102, 241, 0.45);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.card-elevated:hover {
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    0 18px 44px -20px rgba(124, 58, 237, 0.5);
+}
+.dark .card-elevated {
+  background-image: linear-gradient(160deg, rgba(99, 102, 241, 0.1), rgba(244, 63, 94, 0.04) 55%, transparent);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 12px 34px -18px rgba(99, 102, 241, 0.4);
+}
+
+/* ---- KPI gradient icon tiles ---- */
+.kpi-tile {
+  color: #ffffff;
+}
+.kpi-tile svg,
+.dark .kpi-tile svg {
+  color: #ffffff;
+}
+.kpi-tile-blue {
+  background-image: linear-gradient(135deg, #3b82f6, #6366f1);
+  box-shadow: 0 8px 18px -10px rgba(59, 130, 246, 0.9);
+}
+.kpi-tile-emerald {
+  background-image: linear-gradient(135deg, #10b981, #0d9488);
+  box-shadow: 0 8px 18px -10px rgba(16, 185, 129, 0.9);
+}
+.kpi-tile-amber {
+  background-image: linear-gradient(135deg, #f59e0b, #f97316);
+  box-shadow: 0 8px 18px -10px rgba(245, 158, 11, 0.9);
+}
+.kpi-tile-violet {
+  background-image: linear-gradient(135deg, #8b5cf6, #d946ef);
+  box-shadow: 0 8px 18px -10px rgba(139, 92, 246, 0.9);
+}
+.kpi-tile-orange {
+  background-image: linear-gradient(135deg, #f97316, #f43f5e);
+  box-shadow: 0 8px 18px -10px rgba(249, 115, 22, 0.9);
+}
+
+/* ---- Gradient avatars ---- */
+.avatar-gradient {
+  background-color: #6366f1;
+  background-image: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
+}
+
+/* ---- Recharts text (ticks + pie labels) ---- */
+.recharts-wrapper text {
+  fill: #475569;
+}
+.dark .recharts-wrapper text {
+  fill: #94a3b8;
+}
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {

@@ -19,7 +19,7 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
       <div
         ref={ref}
         className={cn(
-          "flex items-center justify-center rounded-full bg-slate-900 font-medium text-white",
+          "avatar-gradient flex items-center justify-center rounded-full font-medium text-white",
           sizes[size],
           className
         )}

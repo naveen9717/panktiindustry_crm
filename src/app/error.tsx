@@ -11,7 +11,7 @@ export default function Error({
   reset: () => void;
 }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50">
+    <div className="flex min-h-screen items-center justify-center bg-page">
       <div className="text-center">
         <AlertTriangle className="mx-auto h-12 w-12 text-red-500" />
         <h1 className="mt-4 text-2xl font-bold text-slate-900">Something went wrong</h1>

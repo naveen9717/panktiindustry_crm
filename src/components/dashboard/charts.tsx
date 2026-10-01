@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -17,14 +17,43 @@ import {
   Legend,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTheme } from "@/lib/hooks/use-theme";
 
-const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4", "#f97316", "#ec4899"];
+const COLORS = ["#6366f1", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4", "#f97316", "#ec4899"];
+
+/** Theme-aware chart colors (grid, axes, tooltip, legend). */
+function useChartColors() {
+  const { theme } = useTheme();
+  const dark = theme === "dark";
+  return React.useMemo(
+    () => ({
+      grid: dark ? "#1e293b" : "#e2e8f0",
+      axis: dark ? "#334155" : "#cbd5e1",
+      tooltipBg: dark ? "#0f172a" : "#ffffff",
+      tooltipBorder: dark ? "#334155" : "#e2e8f0",
+      tooltipText: dark ? "#e2e8f0" : "#0f172a",
+      legend: dark ? "#94a3b8" : "#475569",
+    }),
+    [dark]
+  );
+}
+
+function tooltipStyle(c: ReturnType<typeof useChartColors>): React.CSSProperties {
+  return {
+    backgroundColor: c.tooltipBg,
+    border: `1px solid ${c.tooltipBorder}`,
+    borderRadius: "8px",
+    fontSize: "12px",
+    color: c.tooltipText,
+  };
+}
 
 interface LeadsOverTimeChartProps {
   data: { date: string; count: number; converted: number }[];
 }
 
 export function LeadsOverTimeChart({ data }: LeadsOverTimeChartProps) {
+  const c = useChartColors();
   return (
     <Card>
       <CardHeader>
@@ -33,22 +62,41 @@ export function LeadsOverTimeChart({ data }: LeadsOverTimeChartProps) {
       <CardContent>
         <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="#94a3b8" />
-              <YAxis tick={{ fontSize: 12 }} stroke="#94a3b8" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "white",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: "8px",
-                  fontSize: "12px",
-                }}
+            <AreaChart data={data}>
+              <defs>
+                <linearGradient id="gradLeadsTotal" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#6366f1" stopOpacity={0.4} />
+                  <stop offset="100%" stopColor="#6366f1" stopOpacity={0.02} />
+                </linearGradient>
+                <linearGradient id="gradLeadsConverted" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#10b981" stopOpacity={0.4} />
+                  <stop offset="100%" stopColor="#10b981" stopOpacity={0.02} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke={c.grid} vertical={false} />
+              <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke={c.axis} tickLine={false} />
+              <YAxis tick={{ fontSize: 12 }} stroke={c.axis} tickLine={false} />
+              <Tooltip contentStyle={tooltipStyle(c)} cursor={{ stroke: c.grid }} />
+              <Legend wrapperStyle={{ color: c.legend, fontSize: 12 }} />
+              <Area
+                type="monotone"
+                dataKey="count"
+                stroke="#6366f1"
+                strokeWidth={2.5}
+                fill="url(#gradLeadsTotal)"
+                name="Total Leads"
+                activeDot={{ r: 4 }}
               />
-              <Legend />
-              <Line type="monotone" dataKey="count" stroke="#3b82f6" name="Total Leads" strokeWidth={2} dot={false} />
-              <Line type="monotone" dataKey="converted" stroke="#10b981" name="Converted" strokeWidth={2} dot={false} />
-            </LineChart>
+              <Area
+                type="monotone"
+                dataKey="converted"
+                stroke="#10b981"
+                strokeWidth={2.5}
+                fill="url(#gradLeadsConverted)"
+                name="Converted"
+                activeDot={{ r: 4 }}
+              />
+            </AreaChart>
           </ResponsiveContainer>
         </div>
       </CardContent>
@@ -61,6 +109,7 @@ interface LeadStatusChartProps {
 }
 
 export function LeadStatusChart({ data }: LeadStatusChartProps) {
+  const c = useChartColors();
   return (
     <Card>
       <CardHeader>
@@ -85,14 +134,7 @@ export function LeadStatusChart({ data }: LeadStatusChartProps) {
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "white",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: "8px",
-                  fontSize: "12px",
-                }}
-              />
+              <Tooltip contentStyle={tooltipStyle(c)} />
             </PieChart>
           </ResponsiveContainer>
         </div>
@@ -106,6 +148,7 @@ interface PaymentsOverTimeChartProps {
 }
 
 export function PaymentsOverTimeChart({ data }: PaymentsOverTimeChartProps) {
+  const c = useChartColors();
   return (
     <Card>
       <CardHeader>
@@ -115,19 +158,18 @@ export function PaymentsOverTimeChart({ data }: PaymentsOverTimeChartProps) {
         <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="#94a3b8" />
-              <YAxis tick={{ fontSize: 12 }} stroke="#94a3b8" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "white",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: "8px",
-                  fontSize: "12px",
-                }}
-              />
-              <Legend />
-              <Bar dataKey="amount" fill="#3b82f6" name="Amount" radius={[4, 4, 0, 0]} />
+              <defs>
+                <linearGradient id="gradPaymentBars" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#818cf8" />
+                  <stop offset="100%" stopColor="#6366f1" />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke={c.grid} vertical={false} />
+              <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke={c.axis} tickLine={false} />
+              <YAxis tick={{ fontSize: 12 }} stroke={c.axis} tickLine={false} />
+              <Tooltip contentStyle={tooltipStyle(c)} cursor={{ fill: c.grid, fillOpacity: 0.3 }} />
+              <Legend wrapperStyle={{ color: c.legend, fontSize: 12 }} />
+              <Bar dataKey="amount" fill="url(#gradPaymentBars)" name="Amount" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -141,6 +183,7 @@ interface TeamPerformanceChartProps {
 }
 
 export function TeamPerformanceChart({ data }: TeamPerformanceChartProps) {
+  const c = useChartColors();
   return (
     <Card>
       <CardHeader>
@@ -150,20 +193,23 @@ export function TeamPerformanceChart({ data }: TeamPerformanceChartProps) {
         <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis type="number" tick={{ fontSize: 12 }} stroke="#94a3b8" />
-              <YAxis dataKey="name" type="category" tick={{ fontSize: 12 }} stroke="#94a3b8" width={100} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "white",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: "8px",
-                  fontSize: "12px",
-                }}
-              />
-              <Legend />
-              <Bar dataKey="totalCustomers" fill="#3b82f6" name="Total Customers" radius={[0, 4, 4, 0]} />
-              <Bar dataKey="converted" fill="#10b981" name="Converted" radius={[0, 4, 4, 0]} />
+              <defs>
+                <linearGradient id="gradTeamTotal" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor="#6366f1" />
+                  <stop offset="100%" stopColor="#a5b4fc" />
+                </linearGradient>
+                <linearGradient id="gradTeamConverted" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor="#059669" />
+                  <stop offset="100%" stopColor="#34d399" />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke={c.grid} horizontal={false} />
+              <XAxis type="number" tick={{ fontSize: 12 }} stroke={c.axis} tickLine={false} />
+              <YAxis dataKey="name" type="category" tick={{ fontSize: 12 }} stroke={c.axis} tickLine={false} width={100} />
+              <Tooltip contentStyle={tooltipStyle(c)} cursor={{ fill: c.grid, fillOpacity: 0.3 }} />
+              <Legend wrapperStyle={{ color: c.legend, fontSize: 12 }} />
+              <Bar dataKey="totalCustomers" fill="url(#gradTeamTotal)" name="Total Customers" radius={[0, 6, 6, 0]} />
+              <Bar dataKey="converted" fill="url(#gradTeamConverted)" name="Converted" radius={[0, 6, 6, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
