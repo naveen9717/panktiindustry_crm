@@ -34,7 +34,7 @@ export async function TeamMemberDashboard({ user }: { user: { id: string; firstN
       {/* Welcome */}
       <div>
         <h1 className="text-2xl font-bold text-slate-900">
-          Welcome back, {user.firstName}!
+          WELCOME BACK, {user.firstName}!
         </h1>
         <p className="text-sm text-slate-500">Here&apos;s what&apos;s happening with your customers today.</p>
       </div>
