@@ -12,7 +12,6 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Building2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar } from "@/components/ui/avatar";
@@ -50,10 +49,13 @@ export function Sidebar({ user, navItems, isCollapsed, onToggle, onLogout }: Sid
       {/* Logo */}
       <div className="flex h-16 items-center justify-between border-b border-slate-200 px-4">
         {!isCollapsed && (
-          <div className="flex items-center gap-2">
-            <Building2 className="h-6 w-6 text-indigo-600" />
-            <span className="brand-text text-xl font-bold tracking-tight">PANKTIINDUSTRY</span>
-          </div>
+          <img
+            src="/pankti-logo.png"
+            alt="PANKTIINDUSTRY"
+            width={509}
+            height={509}
+            className="brand-logo h-12 w-12"
+          />
         )}
         <Button variant="ghost" size="icon" onClick={onToggle} className="h-8 w-8">
           {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
