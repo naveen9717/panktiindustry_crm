@@ -52,7 +52,7 @@ export function Sidebar({ user, navItems, isCollapsed, onToggle, onLogout }: Sid
         {!isCollapsed && (
           <div className="flex items-center gap-2">
             <Building2 className="h-6 w-6 text-indigo-600" />
-            <span className="brand-text text-base font-bold tracking-tight">PANKTIINDUSTRY</span>
+            <span className="brand-text text-xl font-bold tracking-tight">PANKTIINDUSTRY</span>
           </div>
         )}
         <Button variant="ghost" size="icon" onClick={onToggle} className="h-8 w-8">
