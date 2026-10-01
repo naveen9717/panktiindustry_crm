@@ -39,8 +39,8 @@ export function MobileSidebar({ user, navItems, isOpen, onClose, onLogout }: Mob
         {/* Header */}
         <div className="flex h-16 items-center justify-between border-b border-slate-200 px-4">
           <div className="flex items-center gap-2">
-            <Building2 className="h-6 w-6 text-slate-900" />
-            <span className="text-lg font-bold text-slate-900">CRM</span>
+            <Building2 className="h-6 w-6 text-indigo-600" />
+            <span className="brand-text text-base font-bold tracking-tight">PANKTIINDUSTRY</span>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-5 w-5" />

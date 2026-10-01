@@ -6,8 +6,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "CRM - Customer Relationship Management",
-  description: "Modern CRM for managing customers, leads, and payments",
+  title: "PANKTIINDUSTRY - Customer Relationship Management",
+  description: "Modern PANKTIINDUSTRY for managing customers, leads, and payments",
 };
 
 /**
