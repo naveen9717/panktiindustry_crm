@@ -78,7 +78,7 @@ export function ResetPasswordForm() {
 
   if (!token) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+      <div className="flex min-h-screen items-center justify-center bg-page px-4">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-slate-900">Invalid reset link</h2>
           <p className="mt-2 text-sm text-slate-500">
@@ -97,7 +97,7 @@ export function ResetPasswordForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-page px-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <div className="mb-4 flex justify-center">

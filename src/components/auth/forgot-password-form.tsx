@@ -59,7 +59,7 @@ export function ForgotPasswordForm() {
 
   if (submitted) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+      <div className="flex min-h-screen items-center justify-center bg-page px-4">
         <div className="w-full max-w-md text-center">
           <div className="mb-4 flex justify-center">
             <CheckCircle className="h-12 w-12 text-emerald-500" />
@@ -81,7 +81,7 @@ export function ForgotPasswordForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-page px-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <div className="mb-4 flex justify-center">

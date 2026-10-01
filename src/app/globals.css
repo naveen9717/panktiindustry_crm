@@ -128,9 +128,9 @@ option {
   color: #e5e5e5;
 }
 .dark .bg-page {
-  background-color: #0f0e17;
+  background-color: #0a0912;
   color: #e5e5e5;
-  background-image: radial-gradient(ellipse at 65% 0%, #180a11, #110810, #0f0e17 60%, #1c1b2e);
+  background-image: radial-gradient(at 60% 40%, rgb(45, 13, 24) 0%, rgb(26, 10, 20) 35%, rgb(13, 12, 26) 70%, rgb(10, 9, 18) 100%);
 }
 
 /* ---- Header (glass) ---- */
