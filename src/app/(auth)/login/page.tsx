@@ -1,10 +1,6 @@
-import { Suspense } from "react";
-import { LoginForm } from "@/components/auth/login-form";
+import { redirect } from "next/navigation";
 
+/** Login lives on the domain root now — keep /login working as a redirect. */
 export default function LoginPage() {
-  return (
-    <Suspense fallback={null}>
-      <LoginForm />
-    </Suspense>
-  );
+  redirect("/");
 }

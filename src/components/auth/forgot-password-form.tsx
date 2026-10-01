@@ -95,7 +95,7 @@ export function ForgotPasswordForm() {
           </p>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
           {error && (
             <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">
               {error}

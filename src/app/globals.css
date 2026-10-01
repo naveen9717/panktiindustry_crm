@@ -10,6 +10,7 @@
 body {
   @apply bg-slate-50 text-slate-900 antialiased;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 /* Form controls don't inherit text-transform (UA default) — force it */
 button,
@@ -69,10 +70,15 @@ option {
 .dark .hover\:text-slate-900:hover { color: #f5f5f5; }
 .dark .hover\:text-slate-600:hover { color: #d4d4d4; }
 
-/* Borders → neutral */
+/* Borders → hairline white (their popup-border: rgba(255,255,255,.1)) */
 .dark .border-slate-100,
-.dark .border-slate-200 { border-color: #262626; }
-.dark .border-slate-300 { border-color: #3f3f3f; }
+.dark .border-slate-200 { border-color: rgba(255, 255, 255, 0.1); }
+.dark .border-slate-300 { border-color: rgba(255, 255, 255, 0.2); }
+
+/* Scrollbars (theirs: thumb #ffffff1f, hover #ffffff38, transparent track) */
+.dark ::-webkit-scrollbar-track { background: transparent; }
+.dark ::-webkit-scrollbar-thumb { background: #ffffff1f; border-radius: 99px; }
+.dark ::-webkit-scrollbar-thumb:hover { background: #ffffff38; }
 
 /* Status / tinted backgrounds → translucent dark tints */
 .dark .bg-red-50,
@@ -185,18 +191,17 @@ h1 {
 
 /* ---- Primary buttons (brand accent) ---- */
 .btn-gradient {
-  background-color: #6366f1;
-  background-image: linear-gradient(135deg, #6366f1 0%, #8b5cf6 55%, #a855f7 100%);
+  background-color: #c73659;
   color: #ffffff;
-  box-shadow: 0 4px 14px -6px rgba(99, 102, 241, 0.75);
-  transition: filter 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 4px 14px -6px rgba(199, 54, 89, 0.75);
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
 }
 .btn-gradient:hover {
-  filter: brightness(1.08);
-  box-shadow: 0 6px 18px -6px rgba(124, 58, 237, 0.8);
+  background-color: #a82d4a;
+  box-shadow: 0 6px 18px -6px rgba(199, 54, 89, 0.8);
 }
 .btn-gradient:active {
-  filter: brightness(0.94);
+  background-color: #8f2540;
 }
 
 /* ---- Cards: soft elevation + subtle sheen ---- */

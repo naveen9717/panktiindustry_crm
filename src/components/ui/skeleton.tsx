@@ -22,7 +22,7 @@ export function TableSkeleton({ rows = 5, columns = 6 }: { rows?: number; column
 
 export function CardSkeleton() {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-6 space-y-4">
+    <div className="rounded-2xl border border-slate-200 bg-white p-6 space-y-4">
       <Skeleton className="h-4 w-1/3" />
       <Skeleton className="h-8 w-1/2" />
       <Skeleton className="h-4 w-2/3" />
