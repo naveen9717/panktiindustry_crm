@@ -14,7 +14,8 @@ body {
 /* ------------------------------------------------------------------ */
 /* Dark palette remap: applies the slate/neutral + status tokens used   */
 /* across the app to their dark equivalents when <html class="dark">.   */
-/* True-black theme: surfaces are neutral black/gray gradients.         */
+/* Dark theme: wine→indigo radial gradient bg + indigo-navy surfaces      */
+/* (palette taken from wedding-crm-silk.vercel.app)                       */
 /* Unlayered on purpose so it wins over plain (light) utilities;        */
 /* avoid using the same property in a `dark:` utility for these tokens. */
 /* ------------------------------------------------------------------ */
@@ -22,15 +23,15 @@ body {
   color-scheme: dark;
 }
 
-/* Surfaces → near-black with a faint white sheen */
+/* Surfaces → indigo-navy with a faint white sheen */
 .dark .bg-white {
-  background-color: #0f0f0f;
+  background-color: #13112a;
   background-image: linear-gradient(160deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015) 55%, transparent);
 }
-.dark .bg-slate-50 { background-color: #171717; }
-.dark .bg-slate-100,
-.dark .hover\:bg-slate-50:hover { background-color: #171717; }
-.dark .hover\:bg-slate-100:hover { background-color: #262626; }
+.dark .bg-slate-50 { background-color: #1a1825; }
+.dark .bg-slate-100 { background-color: #1a1825; }
+.dark .hover\:bg-slate-50:hover { background-color: #1c1a2e; }
+.dark .hover\:bg-slate-100:hover { background-color: #2a2745; }
 .dark .bg-slate-200 { background-color: #2e2e2e; }
 .dark .bg-slate-800,
 .dark .bg-slate-900 { background-color: #1a1a1a; }
@@ -95,17 +96,14 @@ body {
     linear-gradient(160deg, #f8fafc 0%, #eef2ff 55%, #fdf2f8 100%);
 }
 .dark body {
-  background-color: #000000;
+  background-color: #0f0e17;
+  background-image: radial-gradient(ellipse at 65% 0%, #180a11, #110810, #0f0e17 60%, #1c1b2e);
   color: #e5e5e5;
 }
 .dark .bg-page {
-  background-color: #000000;
+  background-color: #0f0e17;
   color: #e5e5e5;
-  background-image:
-    radial-gradient(1000px 550px at 8% -8%, rgba(255, 255, 255, 0.055), transparent 60%),
-    radial-gradient(900px 500px at 100% 0%, rgba(255, 255, 255, 0.035), transparent 55%),
-    radial-gradient(900px 800px at 55% 115%, rgba(255, 255, 255, 0.03), transparent 60%),
-    linear-gradient(160deg, #000000 0%, #0a0a0a 55%, #121212 100%);
+  background-image: radial-gradient(ellipse at 65% 0%, #180a11, #110810, #0f0e17 60%, #1c1b2e);
 }
 
 /* ---- Header (glass) ---- */
@@ -116,8 +114,8 @@ body {
   -webkit-backdrop-filter: blur(12px);
 }
 .dark .surface-header {
-  background-color: rgba(0, 0, 0, 0.85);
-  background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.95), rgba(20, 20, 20, 0.88));
+  background-color: rgba(15, 14, 23, 0.88);
+  background-image: linear-gradient(90deg, rgba(15, 14, 23, 0.95), rgba(28, 27, 46, 0.88));
 }
 
 /* ---- Sidebar ---- */
@@ -126,8 +124,8 @@ body {
   background-image: linear-gradient(180deg, #ffffff 0%, #f6f7fd 100%);
 }
 .dark .surface-sidebar {
-  background-color: #000000;
-  background-image: linear-gradient(180deg, #000000 0%, #141414 100%);
+  background-color: #0d0c1a;
+  background-image: linear-gradient(180deg, #0a0912 0%, #0d0c1a 100%);
 }
 
 /* ---- Bebas Neue: brand text + page headings (h1) ---- */
