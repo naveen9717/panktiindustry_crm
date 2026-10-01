@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { Bell, LogOut, Menu, Moon, Sun } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { getInitials } from "@/lib/utils";
@@ -121,6 +122,14 @@ export function TopHeader({ user, onMenuClick, onLogout }: TopHeaderProps) {
                 ))
               )}
             </div>
+            {user.role === "MASTER_ADMIN" && (
+              <Link
+                href="/admin/notifications"
+                className="block border-t border-slate-200 px-4 py-2.5 text-center text-xs font-semibold text-indigo-600 transition-colors hover:bg-slate-50 hover:text-indigo-700"
+              >
+                View all notifications
+              </Link>
+            )}
           </div>
         </DropdownMenu>
 

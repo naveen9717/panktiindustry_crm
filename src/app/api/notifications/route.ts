@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-import { desc, eq, and, or, sql } from "drizzle-orm";
+import { NextRequest, NextResponse } from "next/server";
+import { desc, eq, and, or, count, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db/local";
 import { getCurrentUser } from "@/lib/auth/session";
 import { activityLogs } from "@/db/schema";
@@ -7,17 +7,26 @@ import { activityLogs } from "@/db/schema";
 export const dynamic = "force-dynamic";
 
 /**
- * Recent activity for the signed-in user, used by the header notification bell.
+ * Activity feed for the signed-in user.
  * - MASTER_ADMIN sees all activity
  * - TEAM_MEMBER sees their own activity + activity on customers assigned to them
+ *
+ * Query params: page (default 1), pageSize (default 15, max 100)
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const db = await getDb();
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const { searchParams } = new URL(request.url);
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10) || 1);
+    const pageSize = Math.min(
+      100,
+      Math.max(1, parseInt(searchParams.get("pageSize") || "15", 10) || 15)
+    );
 
     const where =
       user.role === "MASTER_ADMIN"
@@ -34,15 +43,20 @@ export async function GET() {
             )
           );
 
-    const logs = await db.query.activityLogs.findMany({
-      where,
-      orderBy: desc(activityLogs.createdAt),
-      limit: 15,
-      with: {
-        user: { columns: { firstName: true, lastName: true } },
-      },
-    });
+    const [logs, totalRow] = await Promise.all([
+      db.query.activityLogs.findMany({
+        where,
+        orderBy: desc(activityLogs.createdAt),
+        limit: pageSize,
+        offset: (page - 1) * pageSize,
+        with: {
+          user: { columns: { firstName: true, lastName: true } },
+        },
+      }),
+      db.select({ count: count() }).from(activityLogs).where(where),
+    ]);
 
+    const total = totalRow[0]?.count ?? 0;
     const dayAgoSeconds = Math.floor(Date.now() / 1000) - 24 * 3600;
     const unread = logs.filter(
       (l) => Math.floor(l.createdAt.getTime() / 1000) >= dayAgoSeconds
@@ -58,6 +72,10 @@ export async function GET() {
         actor: l.user ? `${l.user.firstName} ${l.user.lastName}` : "System",
       })),
       unread,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
     });
   } catch (error) {
     console.error("Notifications error:", error);

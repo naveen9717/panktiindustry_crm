@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { LayoutDashboard, Users, UserCog, CreditCard, Settings } from "lucide-react";
+import { LayoutDashboard, Users, UserCog, CreditCard, Settings, Bell } from "lucide-react";
 import { Sidebar } from "./sidebar";
 import { MobileSidebar } from "./mobile-sidebar";
 import { TopHeader } from "./top-header";
@@ -20,6 +20,7 @@ interface AdminLayoutProps {
 
 const adminNavItems = [
   { href: "/admin/dashboard", label: "Dashboard", icon: <LayoutDashboard className="h-5 w-5" /> },
+  { href: "/admin/notifications", label: "Notifications", icon: <Bell className="h-5 w-5" /> },
   { href: "/admin/customers", label: "Customers", icon: <Users className="h-5 w-5" /> },
   { href: "/admin/team-members", label: "Team Members", icon: <UserCog className="h-5 w-5" /> },
   { href: "/admin/payments", label: "Payments", icon: <CreditCard className="h-5 w-5" /> },
