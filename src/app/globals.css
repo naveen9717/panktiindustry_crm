@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Class-based dark mode (driven by next-themes, class on <html>) */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
 }
@@ -7,6 +10,79 @@
 body {
   @apply bg-slate-50 text-slate-900 antialiased;
 }
+
+/* Page background (separate from bg-slate-50 which is used for inset panels) */
+.bg-page {
+  background-color: #f8fafc;
+}
+.dark body,
+.dark .bg-page {
+  background-color: #020617;
+  color: #e2e8f0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Dark palette remap: applies the slate/neutral + status tokens used   */
+/* across the app to their dark equivalents when <html class="dark">.   */
+/* Unlayered on purpose so it wins over plain (light) utilities;        */
+/* avoid using the same property in a `dark:` utility for these tokens. */
+/* ------------------------------------------------------------------ */
+.dark {
+  color-scheme: dark;
+}
+
+/* Surfaces */
+.dark .bg-white { background-color: #0f172a; }
+.dark .bg-slate-50 { background-color: #1e293b; }
+.dark .bg-slate-100,
+.dark .hover\:bg-slate-50:hover { background-color: #1e293b; }
+.dark .hover\:bg-slate-100:hover { background-color: #334155; }
+.dark .bg-slate-200 { background-color: #334155; }
+.dark .bg-slate-800,
+.dark .bg-slate-900 { background-color: #1e293b; }
+.dark .hover\:bg-slate-800:hover { background-color: #334155; }
+
+/* Text */
+.dark .text-slate-950,
+.dark .text-slate-900 { color: #f1f5f9; }
+.dark .text-slate-800,
+.dark .text-slate-700 { color: #e2e8f0; }
+.dark .text-slate-600 { color: #cbd5e1; }
+.dark .text-slate-500 { color: #94a3b8; }
+.dark .text-slate-400 { color: #64748b; }
+.dark .hover\:text-slate-900:hover { color: #f1f5f9; }
+.dark .hover\:text-slate-600:hover { color: #cbd5e1; }
+
+/* Borders */
+.dark .border-slate-100,
+.dark .border-slate-200 { border-color: #1e293b; }
+.dark .border-slate-300 { border-color: #334155; }
+
+/* Status / tinted backgrounds → translucent dark tints */
+.dark .bg-red-50,
+.dark .bg-red-100 { background-color: rgb(127 29 29 / 0.35); }
+.dark .bg-emerald-50,
+.dark .bg-emerald-100 { background-color: rgb(6 78 59 / 0.35); }
+.dark .bg-amber-50 { background-color: rgb(120 53 15 / 0.35); }
+.dark .bg-blue-50 { background-color: rgb(30 58 138 / 0.35); }
+.dark .bg-violet-50 { background-color: rgb(76 29 149 / 0.35); }
+.dark .bg-orange-50 { background-color: rgb(154 52 18 / 0.35); }
+
+/* Status text → lighter shades for contrast */
+.dark .text-red-500,
+.dark .text-red-600,
+.dark .text-red-700,
+.dark .text-red-800 { color: #f87171; }
+.dark .text-emerald-500,
+.dark .text-emerald-600,
+.dark .text-emerald-700 { color: #34d399; }
+.dark .text-amber-600,
+.dark .text-amber-700,
+.dark .text-amber-800 { color: #fbbf24; }
+.dark .text-blue-600,
+.dark .text-blue-700 { color: #60a5fa; }
+.dark .text-violet-600 { color: #a78bfa; }
+.dark .text-orange-600 { color: #fb923c; }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
@@ -24,4 +100,11 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-slate-400;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
 }

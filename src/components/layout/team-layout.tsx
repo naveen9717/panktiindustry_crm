@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { LayoutDashboard, Users, CreditCard, Settings } from "lucide-react";
 import { Sidebar } from "./sidebar";
 import { MobileSidebar } from "./mobile-sidebar";
+import { TopHeader } from "./top-header";
 
 interface TeamLayoutProps {
   children: React.ReactNode;
@@ -36,7 +37,7 @@ export function TeamLayout({ children, user }: TeamLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-page">
       {/* Desktop sidebar */}
       <div className="hidden lg:block">
         <Sidebar
@@ -59,6 +60,11 @@ export function TeamLayout({ children, user }: TeamLayoutProps) {
 
       {/* Main content */}
       <div className={`transition-all duration-300 ${collapsed ? "lg:ml-16" : "lg:ml-64"}`}>
+        <TopHeader
+          user={user}
+          onMenuClick={() => setMobileOpen(true)}
+          onLogout={handleLogout}
+        />
         <main className="min-h-screen">{children}</main>
       </div>
     </div>
