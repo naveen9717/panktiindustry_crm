@@ -13,7 +13,7 @@ import { DataTable } from "@/components/tables/data-table";
 import { TeamMemberFormDialog } from "./team-member-form-dialog";
 import { DeleteTeamMemberDialog } from "./delete-team-member-dialog";
 import { ResetPasswordDialog } from "./reset-password-dialog";
-import { Plus, Eye, Pencil, Trash2, Users, CreditCard, UserCheck, Key } from "lucide-react";
+import { Plus, Eye, Pencil, Trash2, Users, CreditCard, UserCheck, Key, Search } from "lucide-react";
 import type { User } from "@/db/schema";
 
 type TeamMemberWithStats = Pick<User, "id" | "firstName" | "lastName" | "email" | "phone" | "role" | "status" | "profileImage" | "lastLoginAt" | "createdAt" | "updatedAt"> & {
@@ -184,6 +184,7 @@ export function TeamMembersTable({ members, total, page, pageSize, totalPages, c
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <div className="relative w-64">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <Input
               placeholder="Search members..."
               value={currentFilters.search}
@@ -206,8 +207,6 @@ export function TeamMembersTable({ members, total, page, pageSize, totalPages, c
       <DataTable
         columns={columns}
         data={members}
-        searchPlaceholder="Search members..."
-        searchKey="search"
         totalItems={total}
         pageSize={pageSize}
         currentPage={page}
