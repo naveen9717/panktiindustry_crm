@@ -20,10 +20,10 @@ interface AdminLayoutProps {
 
 const adminNavItems = [
   { href: "/admin/dashboard", label: "Dashboard", icon: <LayoutDashboard className="h-5 w-5" /> },
-  { href: "/admin/notifications", label: "Notifications", icon: <Bell className="h-5 w-5" /> },
   { href: "/admin/customers", label: "Customers", icon: <Users className="h-5 w-5" /> },
   { href: "/admin/team-members", label: "Team Members", icon: <UserCog className="h-5 w-5" /> },
   { href: "/admin/payments", label: "Payments", icon: <CreditCard className="h-5 w-5" /> },
+  { href: "/admin/notifications", label: "Notifications", icon: <Bell className="h-5 w-5" /> },
   { href: "/admin/settings", label: "Settings", icon: <Settings className="h-5 w-5" /> },
 ];
 
