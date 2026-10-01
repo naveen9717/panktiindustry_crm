@@ -130,6 +130,12 @@ body {
   background-image: linear-gradient(180deg, #000000 0%, #141414 100%);
 }
 
+/* ---- Bebas Neue: brand text + page headings (h1) ---- */
+.brand-text,
+h1 {
+  font-family: var(--font-bebas, "Bebas Neue"), ui-sans-serif, system-ui, sans-serif;
+}
+
 /* ---- Brand gradient text ---- */
 .brand-text {
   background-image: linear-gradient(135deg, #6366f1 0%, #a855f7 55%, #f43f5e 100%);
