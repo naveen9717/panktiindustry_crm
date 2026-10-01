@@ -8,18 +8,18 @@ async function seed() {
   console.log("Seeding database...");
 
   // Create Master Admin
-  const adminPassword = await bcrypt.hash("Admin@123456", 12);
+  const adminPassword = await bcrypt.hash("Panktiindustry@123456", 12);
   await db.insert(schema.users).values({
     id: crypto.randomUUID(),
-    firstName: "Admin",
-    lastName: "User",
-    email: "admin@example.com",
+    firstName: "Panktiindustry",
+    lastName: "",
+    email: "panktiindustry@gmail.com",
     phone: "9876543210",
     passwordHash: adminPassword,
     role: "MASTER_ADMIN",
     status: "ACTIVE",
   });
-  console.log("Created admin: admin@example.com");
+  console.log("Created admin: panktiindustry@gmail.com");
 
   // Create Team Members
   const teamMembers = [
@@ -144,7 +144,7 @@ async function seed() {
 
   console.log("Seeding completed!");
   console.log("\n=== DEVELOPMENT CREDENTIALS ===");
-  console.log("Admin: admin@example.com / Admin@123456");
+  console.log("Admin: panktiindustry@gmail.com / Panktiindustry@123456");
   console.log("Team Member: mike@example.com / Member@123456");
   console.log("================================\n");
 }

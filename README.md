@@ -81,7 +81,7 @@ npm run dev
 
 | Role | Email | Password |
 |------|-------|----------|
-| Master Admin | admin@example.com | Admin@123456 |
+| Master Admin | panktiindustry@gmail.com | Panktiindustry@123456 |
 | Team Member | mike@example.com | Member@123456 |
 
 ## Database Schema

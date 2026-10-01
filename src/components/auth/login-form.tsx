@@ -150,7 +150,7 @@ export function LoginForm() {
         </div>
 
         <p className="mt-6 text-center text-xs text-slate-400">
-          Development credentials: admin@example.com / Admin@123456
+          Development credentials: panktiindustry@gmail.com / Panktiindustry@123456
         </p>
       </div>
     </div>
