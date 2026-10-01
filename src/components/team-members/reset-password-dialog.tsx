@@ -29,7 +29,8 @@ export function ResetPasswordDialog({ open, onOpenChange, member }: ResetPasswor
     }
   }, [open]);
 
-  const handleReset = async () => {
+  const handleReset = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     if (!member) return;
 
     if (newPassword.length < 8) {
@@ -74,45 +75,51 @@ export function ResetPasswordDialog({ open, onOpenChange, member }: ResetPasswor
         <DialogTitle>Reset Password</DialogTitle>
         <DialogClose onClick={() => onOpenChange(false)} />
       </DialogHeader>
-      <DialogContent>
-        <div className="space-y-4">
-          <p className="text-sm text-slate-600">
-            Set a new password for{" "}
-            <span className="font-medium text-slate-900">
-              {member.firstName} {member.lastName}
-            </span>{" "}
-            ({member.email}). They will need to use it on their next login.
-          </p>
-          <div className="space-y-2">
-            <Label htmlFor="newPassword">New Password</Label>
-            <Input
-              id="newPassword"
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Minimum 8 characters"
-            />
+      <form onSubmit={handleReset}>
+        <DialogContent>
+          <div className="space-y-4">
+            <p className="text-sm text-slate-600">
+              Set a new password for{" "}
+              <span className="font-medium text-slate-900">
+                {member.firstName} {member.lastName}
+              </span>{" "}
+              ({member.email}). They will need to use it on their next login.
+            </p>
+            <div className="space-y-2">
+              <Label htmlFor="newPassword">New Password</Label>
+              <Input
+                id="newPassword"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Minimum 8 characters"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm New Password</Label>
+              <Input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                autoComplete="new-password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm New Password</Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-          </div>
-        </div>
-      </DialogContent>
-      <DialogFooter>
-        <Button variant="outline" onClick={() => onOpenChange(false)}>
-          Cancel
-        </Button>
-        <Button onClick={handleReset} loading={loading}>
-          <Key className="h-4 w-4" />
-          Reset Password
-        </Button>
-      </DialogFooter>
+        </DialogContent>
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button type="submit" loading={loading}>
+            <Key className="h-4 w-4" />
+            Reset Password
+          </Button>
+        </DialogFooter>
+      </form>
     </Dialog>
   );
 }

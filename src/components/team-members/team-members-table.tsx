@@ -181,9 +181,9 @@ export function TeamMembersTable({ members, total, page, pageSize, totalPages, c
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         <div className="flex items-center gap-2">
-          <div className="relative w-64">
+          <div className="relative w-72 sm:w-96">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <Input
               placeholder="Search members..."
