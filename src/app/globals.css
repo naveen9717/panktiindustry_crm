@@ -275,34 +275,22 @@ h1 {
     0 20px 48px -22px rgba(0, 0, 0, 1);
 }
 
-/* ---- KPI gradient icon tiles ---- */
+/* ---- KPI icon tiles: transparent fill, the icon carries the accent ---- */
 .kpi-tile {
-  color: #ffffff;
+  background-color: transparent;
+  background-image: none;
+  box-shadow: none;
 }
-.kpi-tile svg,
-.dark .kpi-tile svg {
-  color: #ffffff;
-}
-.kpi-tile-blue {
-  background-image: linear-gradient(135deg, #3b82f6, #6366f1);
-  box-shadow: 0 8px 18px -10px rgba(59, 130, 246, 0.9);
-}
-.kpi-tile-emerald {
-  background-image: linear-gradient(135deg, #10b981, #0d9488);
-  box-shadow: 0 8px 18px -10px rgba(16, 185, 129, 0.9);
-}
-.kpi-tile-amber {
-  background-image: linear-gradient(135deg, #f59e0b, #f97316);
-  box-shadow: 0 8px 18px -10px rgba(245, 158, 11, 0.9);
-}
-.kpi-tile-violet {
-  background-image: linear-gradient(135deg, #8b5cf6, #d946ef);
-  box-shadow: 0 8px 18px -10px rgba(139, 92, 246, 0.9);
-}
-.kpi-tile-orange {
-  background-image: linear-gradient(135deg, #f97316, #f43f5e);
-  box-shadow: 0 8px 18px -10px rgba(249, 115, 22, 0.9);
-}
+.kpi-tile-blue { color: #2563eb; }
+.kpi-tile-emerald { color: #059669; }
+.kpi-tile-amber { color: #d97706; }
+.kpi-tile-violet { color: #7c3aed; }
+.kpi-tile-orange { color: #ea580c; }
+.dark .kpi-tile-blue { color: #60a5fa; }
+.dark .kpi-tile-emerald { color: #34d399; }
+.dark .kpi-tile-amber { color: #fbbf24; }
+.dark .kpi-tile-violet { color: #a78bfa; }
+.dark .kpi-tile-orange { color: #fb923c; }
 
 /* ---- Gradient avatars ---- */
 .avatar-gradient {
