@@ -69,7 +69,7 @@ export function TopHeader({ user, onMenuClick, onLogout }: TopHeaderProps) {
   );
 
   return (
-    <header className="surface-header sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6">
+    <header className="surface-header sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 backdrop-blur-[12px] sm:px-6">
       {/* Left: mobile nav trigger */}
       <div className="flex items-center gap-3">
         {onMenuClick && (

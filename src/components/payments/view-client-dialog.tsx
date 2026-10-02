@@ -174,7 +174,7 @@ export function ViewClientDialog({ customerId, onClose }: ViewClientDialogProps)
                 </Badge>
                 <Link
                   href={`/admin/customers/${client.id}`}
-                  className="text-xs font-medium text-[#c73659] hover:underline"
+                  className="text-xs font-medium text-emerald-600 hover:underline"
                 >
                   Open full profile →
                 </Link>

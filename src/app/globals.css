@@ -13,6 +13,7 @@
   --popup-border: rgb(228 228 231);
 
   /* Emerald brand accent (used by .btn-gradient + checkbox accents) */
+  --color-emerald-600: #059669;
   --color-emerald-700: #047857;
   --color-emerald-800: #065f46;
   --color-emerald-900: #064e3b;
@@ -76,10 +77,10 @@ input[type="radio"] {
   background-color: #221f33;
 }
 .picker-item.is-selected {
-  background-color: rgba(199, 54, 89, 0.07);
+  background-color: rgba(5, 150, 105, 0.08);
 }
 .dark .picker-item.is-selected {
-  background-color: rgba(199, 54, 89, 0.14);
+  background-color: rgba(16, 185, 129, 0.14);
 }
 
 .picker-avatar {
@@ -90,14 +91,14 @@ input[type="radio"] {
   height: 2rem;
   flex-shrink: 0;
   border-radius: 9999px;
-  background-color: rgba(199, 54, 89, 0.1);
-  color: #c73659;
+  background-color: rgba(5, 150, 105, 0.12);
+  color: #047857;
   font-size: 0.75rem;
   font-weight: 600;
 }
 .dark .picker-avatar {
-  background-color: rgba(199, 54, 89, 0.2);
-  color: #e07090;
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #34d399;
 }
 /* Uppercase only where it belongs: headings, brand, buttons, table heads.
    Body copy, labels, table cells and form fields keep their own casing. */
@@ -241,12 +242,10 @@ th {
   background-image: radial-gradient(at 60% 40%, #1a3014 0%, #0a1a11 35%, #0d0c1a 70%, #0a0912 100%);
 }
 
-/* ---- Header (glass) ---- */
+/* ---- Header (glass; blur comes from the backdrop-blur-md utility) ---- */
 .surface-header {
   background-color: rgba(248, 244, 237, 0.85);
   background-image: linear-gradient(90deg, rgba(248, 244, 237, 0.92), rgba(250, 247, 241, 0.85) 60%, rgba(252, 246, 240, 0.82));
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
 }
 .dark .surface-header {
   background-color: rgba(15, 14, 23, 0.88);
@@ -287,12 +286,18 @@ h1 {
   filter: brightness(0) invert(1);
 }
 
-/* ---- Active nav pill (brand accent) ---- */
+/* ---- Active nav pill: transparent emerald glass (blur via backdrop-* utilities) ---- */
 .nav-active-gradient {
-  background-image: linear-gradient(135deg, #6366f1 0%, #8b5cf6 55%, #a855f7 100%);
-  background-color: #7c3aed;
+  color: #047857;
+  background-color: rgba(5, 150, 105, 0.1);
+  background-image: linear-gradient(135deg, rgba(5, 150, 105, 0.16) 0%, rgba(5, 150, 105, 0.08) 55%, rgba(5, 150, 105, 0.05) 100%);
+  box-shadow: inset 0 0 0 1px rgba(4, 120, 87, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+.dark .nav-active-gradient {
   color: #ffffff;
-  box-shadow: 0 6px 16px -8px rgba(124, 58, 237, 0.85);
+  background-color: rgba(16, 185, 129, 0.14);
+  background-image: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 55%, rgba(16, 185, 129, 0.06) 100%);
+  box-shadow: inset 0 0 0 1px rgba(52, 211, 153, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.07);
 }
 
 /* ---- Primary buttons (brand accent: emerald) ---- */
