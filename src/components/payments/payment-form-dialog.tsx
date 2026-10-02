@@ -45,6 +45,12 @@ interface CustomerOption {
   phone: string | null;
 }
 
+interface TeamMemberOption {
+  id: string;
+  name: string;
+  email: string;
+}
+
 const MODE_OPTIONS = [
   { value: "CASH", label: "Cash" },
   { value: "UPI", label: "UPI" },
@@ -67,9 +73,15 @@ const numberOrZero = (value: unknown) => {
 interface PaymentFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Admin mode: pick the team member first; the customer list loads for that member. */
+  adminMode?: boolean;
 }
 
-export function PaymentFormDialog({ open, onOpenChange }: PaymentFormDialogProps) {
+export function PaymentFormDialog({
+  open,
+  onOpenChange,
+  adminMode = false,
+}: PaymentFormDialogProps) {
   const router = useRouter();
   const [loading, setLoading] = React.useState(false);
 
@@ -78,6 +90,10 @@ export function PaymentFormDialog({ open, onOpenChange }: PaymentFormDialogProps
   const [showList, setShowList] = React.useState(false);
   const [searching, setSearching] = React.useState(false);
   const selectedName = React.useRef("");
+
+  const [members, setMembers] = React.useState<TeamMemberOption[]>([]);
+  const [teamMemberId, setTeamMemberId] = React.useState("");
+  const [memberError, setMemberError] = React.useState(false);
 
   const {
     register,
@@ -100,17 +116,39 @@ export function PaymentFormDialog({ open, onOpenChange }: PaymentFormDialogProps
 
   const selectedCustomerId = watch("customerId");
 
-  const fetchCustomers = React.useCallback(async (search: string) => {
-    setSearching(true);
+  const fetchCustomers = React.useCallback(
+    async (search: string, memberId: string) => {
+      if (adminMode && !memberId) {
+        // Admin must pick a member before customers can be listed
+        setOptions([]);
+        setSearching(false);
+        return;
+      }
+      setSearching(true);
+      try {
+        const params = new URLSearchParams({ search, pageSize: "15" });
+        if (adminMode && memberId) params.set("assignedTeamMemberId", memberId);
+        const res = await fetch(`/api/customers?${params.toString()}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        setOptions(data.customers || []);
+      } catch {
+        // network hiccup — keep whatever list we already have
+      } finally {
+        setSearching(false);
+      }
+    },
+    [adminMode]
+  );
+
+  const fetchMembers = React.useCallback(async () => {
     try {
-      const res = await fetch(`/api/customers?search=${encodeURIComponent(search)}&pageSize=15`);
+      const res = await fetch("/api/team-members");
       if (!res.ok) return;
       const data = await res.json();
-      setOptions(data.customers || []);
+      setMembers(data.members || []);
     } catch {
-      // network hiccup — keep whatever list we already have
-    } finally {
-      setSearching(false);
+      // network hiccup — the select simply stays empty
     }
   }, []);
 
@@ -128,8 +166,15 @@ export function PaymentFormDialog({ open, onOpenChange }: PaymentFormDialogProps
     selectedName.current = "";
     setQuery("");
     setShowList(true);
-    fetchCustomers("");
-  }, [open, reset, fetchCustomers]);
+    setTeamMemberId("");
+    setMemberError(false);
+    setOptions([]);
+    if (adminMode) {
+      setMembers([]);
+      fetchMembers();
+    }
+    fetchCustomers("", "");
+  }, [open, reset, fetchCustomers, fetchMembers, adminMode]);
 
   // Debounced search; typing over the old pick clears the selection
   React.useEffect(() => {
@@ -137,9 +182,9 @@ export function PaymentFormDialog({ open, onOpenChange }: PaymentFormDialogProps
     if (query !== selectedName.current) {
       setValue("customerId", "", { shouldValidate: true });
     }
-    const timer = setTimeout(() => fetchCustomers(query), 300);
+    const timer = setTimeout(() => fetchCustomers(query, teamMemberId), 300);
     return () => clearTimeout(timer);
-  }, [query, open, setValue, fetchCustomers]);
+  }, [query, open, teamMemberId, setValue, fetchCustomers]);
 
   const selectCustomer = (customer: CustomerOption) => {
     selectedName.current = customer.name;
@@ -148,13 +193,30 @@ export function PaymentFormDialog({ open, onOpenChange }: PaymentFormDialogProps
     setValue("customerId", customer.id, { shouldValidate: true });
   };
 
+  const onMemberChange = (value: string) => {
+    setTeamMemberId(value);
+    setMemberError(false);
+    // Customers are scoped to the member — clear the pick and reload the list
+    selectedName.current = "";
+    setQuery("");
+    setShowList(true);
+    setValue("customerId", "", { shouldValidate: false });
+    setOptions([]);
+    if (value) fetchCustomers("", value);
+  };
+
   const onSubmit = async (data: PaymentFormValues) => {
+    if (adminMode && !teamMemberId) {
+      setMemberError(true);
+      return;
+    }
     setLoading(true);
     try {
       const res = await fetch("/api/payments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          teamMemberId: adminMode ? teamMemberId : undefined,
           customerId: data.customerId,
           amount: data.amount,
           pendingAmount: data.pendingAmount,
@@ -190,6 +252,25 @@ export function PaymentFormDialog({ open, onOpenChange }: PaymentFormDialogProps
       <form onSubmit={handleSubmit(onSubmit)}>
         <DialogContent className="max-w-2xl">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {adminMode && (
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="teamMember">Team Member *</Label>
+                <Select
+                  id="teamMember"
+                  value={teamMemberId}
+                  onChange={(e) => onMemberChange(e.target.value)}
+                  error={memberError}
+                >
+                  <option value="">Select a team member</option>
+                  {members.map((member) => (
+                    <option key={member.id} value={member.id}>
+                      {member.name}
+                    </option>
+                  ))}
+                </Select>
+                {memberError && <p className="text-xs text-red-500">Select a team member</p>}
+              </div>
+            )}
             <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="customer">Customer *</Label>
               <div className="relative">
@@ -222,7 +303,11 @@ export function PaymentFormDialog({ open, onOpenChange }: PaymentFormDialogProps
                       <li className="px-3.5 py-3 text-xs text-slate-500">Searching…</li>
                     )}
                     {!searching && options.length === 0 && (
-                      <li className="px-3.5 py-3 text-xs text-slate-500">No customers found</li>
+                      <li className="px-3.5 py-3 text-xs text-slate-500">
+                        {adminMode && !teamMemberId
+                          ? "Select a team member to see their customers"
+                          : "No customers found"}
+                      </li>
                     )}
                     {options.map((customer) => {
                       const isSelected = customer.id === selectedCustomerId;
@@ -246,7 +331,7 @@ export function PaymentFormDialog({ open, onOpenChange }: PaymentFormDialogProps
                                 {customer.email || customer.phone || ""}
                               </span>
                             </span>
-                            {isSelected && <Check className="h-4 w-4 shrink-0 text-[#c73659]" />}
+                            {isSelected && <Check className="h-4 w-4 shrink-0 text-emerald-600" />}
                           </button>
                         </li>
                       );

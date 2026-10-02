@@ -11,6 +11,7 @@ import { Select } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { ViewClientDialog } from "@/components/payments/view-client-dialog";
+import { PaymentFormDialog } from "@/components/payments/payment-form-dialog";
 import { Plus, Filter, Download, Eye, IndianRupee, Clock, CreditCard, CheckCircle } from "lucide-react";
 import type { Payment, User, Customer } from "@/db/schema";
 
@@ -65,6 +66,7 @@ export function PaymentsTable({
   const searchParams = useSearchParams();
   const [showFilters, setShowFilters] = React.useState(false);
   const [viewCustomerId, setViewCustomerId] = React.useState<string | null>(null);
+  const [showAddPayment, setShowAddPayment] = React.useState(false);
 
   const updateParams = (updates: Record<string, string>) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -163,6 +165,10 @@ export function PaymentsTable({
           <p className="text-sm text-slate-500">Track and manage all payments</p>
         </div>
         <div className="flex items-center gap-2">
+          <Button size="sm" onClick={() => setShowAddPayment(true)}>
+            <Plus className="h-4 w-4" />
+            Add Payment
+          </Button>
           <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)}>
             <Filter className="h-4 w-4" />
             Filters
@@ -173,6 +179,8 @@ export function PaymentsTable({
           </Button>
         </div>
       </div>
+
+      <PaymentFormDialog open={showAddPayment} onOpenChange={setShowAddPayment} adminMode />
 
       <ViewClientDialog customerId={viewCustomerId} onClose={() => setViewCustomerId(null)} />
 
@@ -287,7 +295,7 @@ export function PaymentsTable({
             <tbody>
               {payments.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-8 text-center text-slate-500">
+                  <td colSpan={9} className="px-4 py-8 text-center text-slate-500">
                     No payments found
                   </td>
                 </tr>

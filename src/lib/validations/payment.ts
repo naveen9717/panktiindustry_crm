@@ -26,6 +26,8 @@ export const createPaymentSchema = z.object({
   paymentMode: paymentModeEnum.default("CASH"),
   paymentStatus: paymentStatusEnum.optional(),
   remarks: z.string().max(1000).optional().or(z.literal("")),
+  /** Admin records on behalf of a member; team members omit it (server forces their own id). */
+  teamMemberId: z.string().optional(),
 });
 
 /* Adding a payment must record at least something: money in, or money owed */

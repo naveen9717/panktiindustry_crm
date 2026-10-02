@@ -18,6 +18,11 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("search") || undefined;
+    // Admin pickers may narrow the list to one member's customers
+    const assignedTeamMemberId =
+      user.role === "MASTER_ADMIN"
+        ? searchParams.get("assignedTeamMemberId") || undefined
+        : undefined;
     const page = parseInt(searchParams.get("page") || "1") || 1;
     const pageSize = Math.min(parseInt(searchParams.get("pageSize") || "20") || 20, 50);
 
@@ -26,6 +31,7 @@ export async function GET(request: NextRequest) {
       page,
       pageSize,
       search,
+      assignedTeamMemberId,
       userId: user.id,
       userRole: user.role,
     });

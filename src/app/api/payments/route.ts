@@ -3,8 +3,8 @@ import { getDb } from "@/lib/db/local";
 import { getCurrentUser } from "@/lib/auth/session";
 import { createPayment } from "@/lib/services/payment";
 import { addPaymentSchema } from "@/lib/validations/payment";
-import { customers } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { customers, users } from "@/db/schema";
+import { and, eq } from "drizzle-orm";
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,6 +22,24 @@ export async function POST(request: NextRequest) {
         { error: "Validation failed", details: validated.error.flatten() },
         { status: 400 }
       );
+    }
+
+    // Resolve which member's customer book this payment belongs to
+    let teamMemberId = user.id;
+    if (user.role === "MASTER_ADMIN") {
+      if (!validated.data.teamMemberId) {
+        return NextResponse.json({ error: "Select a team member" }, { status: 400 });
+      }
+      const member = await db
+        .select({ id: users.id })
+        .from(users)
+        .where(and(eq(users.id, validated.data.teamMemberId), eq(users.role, "TEAM_MEMBER")));
+      if (member.length === 0) {
+        return NextResponse.json({ error: "Team member not found" }, { status: 404 });
+      }
+      teamMemberId = validated.data.teamMemberId;
+    } else if (validated.data.teamMemberId && validated.data.teamMemberId !== user.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     // Team members can only record payments against their own customers
@@ -56,7 +74,7 @@ export async function POST(request: NextRequest) {
         paymentStatus: validated.data.paymentStatus,
         remarks: validated.data.remarks,
       },
-      teamMemberId: user.id,
+      teamMemberId,
       userId: user.id,
       ipAddress: ip,
     });
