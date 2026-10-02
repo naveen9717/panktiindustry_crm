@@ -110,6 +110,53 @@ interface LeadStatusChartProps {
 
 export function LeadStatusChart({ data }: LeadStatusChartProps) {
   const c = useChartColors();
+
+  /**
+   * Slice labels: smaller font, skipped for empty slices (they all stack on the
+   * same angle and overlap), and anchored outwards so long names stay inside
+   * the chart area instead of running off the edge.
+   */
+  const renderLabel = (props: {
+    cx?: number;
+    cy?: number;
+    x?: number;
+    y?: number;
+    midAngle?: number;
+    outerRadius?: number;
+    value?: number;
+    percent?: number;
+    name?: string;
+  }) => {
+    const { cx = 0, cy = 0, midAngle = 0, outerRadius = 0, value = 0, percent = 0, name = "" } = props;
+    if (!value) return null;
+
+    let x = props.x;
+    let y = props.y;
+    if (typeof x !== "number" || typeof y !== "number") {
+      const rad = (-midAngle * Math.PI) / 180;
+      const r = outerRadius + 14;
+      x = cx + r * Math.cos(rad);
+      y = cy + r * Math.sin(rad);
+    }
+
+    const angle = Math.atan2((y ?? 0) - cy, (x ?? 0) - cx);
+    const cos = Math.cos(angle);
+    const textAnchor = cos > 0.2 ? "start" : cos < -0.2 ? "end" : "middle";
+
+    return (
+      <text
+        x={x}
+        y={y}
+        fill={c.legend}
+        fontSize={11}
+        textAnchor={textAnchor}
+        dominantBaseline="central"
+      >
+        {`${name.replace(/_/g, " ")} ${Math.round(percent * 100)}%`}
+      </text>
+    );
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -118,16 +165,16 @@ export function LeadStatusChart({ data }: LeadStatusChartProps) {
       <CardContent>
         <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
+            <PieChart margin={{ top: 8, right: 16, bottom: 8, left: 16 }}>
               <Pie
                 data={data}
                 cx="50%"
                 cy="50%"
                 innerRadius={60}
-                outerRadius={100}
+                outerRadius={95}
                 paddingAngle={2}
                 dataKey="value"
-                label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
+                label={renderLabel}
                 labelLine={false}
               >
                 {data.map((_, index) => (
