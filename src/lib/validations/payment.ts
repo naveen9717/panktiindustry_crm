@@ -20,13 +20,20 @@ export const paymentStatusEnum = z.enum([
 
 export const createPaymentSchema = z.object({
   customerId: z.string().min(1, "Customer ID is required"),
-  amount: z.number().positive("Amount must be greater than 0"),
+  amount: z.number().min(0, "Amount received must be 0 or more"),
+  pendingAmount: z.number().min(0, "Pending amount must be 0 or more").optional().default(0),
   paymentDate: z.string().optional(),
   paymentMode: paymentModeEnum.default("CASH"),
-  paymentStatus: paymentStatusEnum.default("PENDING"),
+  paymentStatus: paymentStatusEnum.optional(),
   transactionId: z.string().max(100).optional().or(z.literal("")),
   remarks: z.string().max(1000).optional().or(z.literal("")),
 });
+
+/* Adding a payment must record at least something: money in, or money owed */
+export const addPaymentSchema = createPaymentSchema.refine(
+  (data) => data.amount > 0 || data.pendingAmount > 0,
+  { message: "Enter an amount received or a pending amount", path: ["amount"] }
+);
 
 export const updatePaymentSchema = createPaymentSchema.partial().extend({
   id: z.string().min(1, "Payment ID is required"),

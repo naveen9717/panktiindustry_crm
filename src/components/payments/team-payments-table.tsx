@@ -10,7 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { KpiCard } from "@/components/dashboard/kpi-card";
-import { Filter, IndianRupee, Clock, CreditCard, CheckCircle } from "lucide-react";
+import { PaymentFormDialog } from "@/components/payments/payment-form-dialog";
+import { Filter, Plus, IndianRupee, Clock, CreditCard, CheckCircle } from "lucide-react";
 import type { Payment, User, Customer } from "@/db/schema";
 
 type PaymentWithRelations = Payment & {
@@ -56,6 +57,7 @@ export function TeamPaymentsTable({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showFilters, setShowFilters] = React.useState(false);
+  const [showAddPayment, setShowAddPayment] = React.useState(false);
 
   const updateParams = (updates: Record<string, string>) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -89,6 +91,16 @@ export function TeamPaymentsTable({
       cell: ({ row }) => (
         <span className="font-medium text-slate-900">{formatCurrency(row.original.amount)}</span>
       ),
+    },
+    {
+      accessorKey: "pendingAmount",
+      header: "Pending",
+      cell: ({ row }) =>
+        row.original.pendingAmount > 0 ? (
+          <span className="font-medium text-amber-600">{formatCurrency(row.original.pendingAmount)}</span>
+        ) : (
+          <span className="text-slate-400">-</span>
+        ),
     },
     {
       accessorKey: "paymentDate",
@@ -129,11 +141,19 @@ export function TeamPaymentsTable({
           <h1 className="text-2xl font-bold text-slate-900">My Payments</h1>
           <p className="text-sm text-slate-500">Payments for your customers</p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)}>
-          <Filter className="h-4 w-4" />
-          Filters
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button size="sm" onClick={() => setShowAddPayment(true)}>
+            <Plus className="h-4 w-4" />
+            Add Payment
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)}>
+            <Filter className="h-4 w-4" />
+            Filters
+          </Button>
+        </div>
       </div>
+
+      <PaymentFormDialog open={showAddPayment} onOpenChange={setShowAddPayment} />
 
       {/* Stats */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -193,6 +213,7 @@ export function TeamPaymentsTable({
               <tr className="border-b border-slate-200 bg-slate-50">
                 <th className="px-4 py-3 text-left font-medium text-slate-500">Customer</th>
                 <th className="px-4 py-3 text-left font-medium text-slate-500">Amount</th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">Pending</th>
                 <th className="px-4 py-3 text-left font-medium text-slate-500">Date</th>
                 <th className="px-4 py-3 text-left font-medium text-slate-500">Mode</th>
                 <th className="px-4 py-3 text-left font-medium text-slate-500">Status</th>
@@ -203,7 +224,7 @@ export function TeamPaymentsTable({
             <tbody>
               {payments.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
+                  <td colSpan={8} className="px-4 py-8 text-center text-slate-500">
                     No payments found
                   </td>
                 </tr>
@@ -215,6 +236,9 @@ export function TeamPaymentsTable({
                       <p className="text-xs text-slate-500">{payment.customer.email || payment.customer.phone}</p>
                     </td>
                     <td className="px-4 py-3 font-medium text-slate-900">{formatCurrency(payment.amount)}</td>
+                    <td className="px-4 py-3 font-medium text-amber-600">
+                      {payment.pendingAmount > 0 ? formatCurrency(payment.pendingAmount) : <span className="text-slate-400">-</span>}
+                    </td>
                     <td className="px-4 py-3 text-slate-600">{formatDate(payment.paymentDate)}</td>
                     <td className="px-4 py-3 text-slate-600">{payment.paymentMode.replace(/_/g, " ")}</td>
                     <td className="px-4 py-3">

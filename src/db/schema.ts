@@ -62,6 +62,7 @@ export const payments = sqliteTable("payments", {
   paymentStatus: text("payment_status", {
     enum: ["PENDING", "PARTIAL", "PAID", "FAILED", "REFUNDED"]
   }).notNull().default("PENDING"),
+  pendingAmount: real("pending_amount").notNull().default(0),
   transactionId: text("transaction_id"),
   remarks: text("remarks"),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),

@@ -1,6 +1,6 @@
 import type { DB } from "@/db";
 import { payments, customers } from "@/db/schema";
-import { eq, and, or, like, desc, asc, sql, count, sum, type SQL } from "drizzle-orm";
+import { eq, and, or, like, desc, asc, sql, count, sum, inArray, type SQL } from "drizzle-orm";
 import { logActivity } from "./activity";
 
 interface CreatePaymentParams {
@@ -8,9 +8,10 @@ interface CreatePaymentParams {
   data: {
     customerId: string;
     amount: number;
+    pendingAmount?: number;
     paymentDate?: Date;
     paymentMode: string;
-    paymentStatus: string;
+    paymentStatus?: string;
     transactionId?: string;
     remarks?: string;
   };
@@ -25,6 +26,12 @@ export async function createPayment({ db, data, teamMemberId, userId, ipAddress 
   });
   if (!customer) throw new Error("Customer not found");
 
+  const pendingAmount = data.pendingAmount ?? 0;
+  // Nothing left to collect → fully paid; part received → partial; nothing in → pending
+  const paymentStatus =
+    data.paymentStatus ??
+    (pendingAmount > 0 ? (data.amount > 0 ? "PARTIAL" : "PENDING") : "PAID");
+
   const id = crypto.randomUUID();
 
   await db.insert(payments).values({
@@ -32,9 +39,10 @@ export async function createPayment({ db, data, teamMemberId, userId, ipAddress 
     customerId: data.customerId,
     teamMemberId,
     amount: data.amount,
+    pendingAmount,
     paymentDate: data.paymentDate || new Date(),
     paymentMode: data.paymentMode as typeof payments.$inferSelect.paymentMode,
-    paymentStatus: data.paymentStatus as typeof payments.$inferInsert.paymentStatus,
+    paymentStatus: paymentStatus as typeof payments.$inferInsert.paymentStatus,
     transactionId: data.transactionId || null,
     remarks: data.remarks || null,
   });
@@ -45,7 +53,7 @@ export async function createPayment({ db, data, teamMemberId, userId, ipAddress 
     action: "PAYMENT_CREATED",
     entityType: "Payment",
     entityId: id,
-    description: `Payment of ₹${data.amount} created for customer "${customer.name}"`,
+    description: `Payment of ₹${data.amount} received${pendingAmount > 0 ? ` (₹${pendingAmount} pending)` : ""} for customer "${customer.name}"`,
     ipAddress,
   });
 
@@ -203,15 +211,30 @@ export async function getPaymentStats(db: DB, userId?: string, userRole?: string
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-  const [totalAmount, receivedAmount, pendingAmount, partialAmount, totalCount, paidCount, pendingCount, partialCount] =
+  const [
+    totalAmount,
+    receivedAmount,
+    pendingStatusAmount,
+    openPendingAmount,
+    partialAmount,
+    totalCount,
+    paidCount,
+    pendingCount,
+    partialCount,
+  ] =
     await Promise.all([
       db.select({ total: sum(payments.amount) }).from(payments).where(whereClause),
+      // Money actually in: fully paid + the received part of partial payments
       db.select({ total: sum(payments.amount) }).from(payments).where(
-        and(...(conditions.length > 0 ? conditions : []), eq(payments.paymentStatus, "PAID"))
+        and(
+          ...(conditions.length > 0 ? conditions : []),
+          inArray(payments.paymentStatus, ["PAID", "PARTIAL"])
+        )
       ),
       db.select({ total: sum(payments.amount) }).from(payments).where(
         and(...(conditions.length > 0 ? conditions : []), eq(payments.paymentStatus, "PENDING"))
       ),
+      db.select({ total: sum(payments.pendingAmount) }).from(payments).where(whereClause),
       db.select({ total: sum(payments.amount) }).from(payments).where(
         and(...(conditions.length > 0 ? conditions : []), eq(payments.paymentStatus, "PARTIAL"))
       ),
@@ -228,9 +251,11 @@ export async function getPaymentStats(db: DB, userId?: string, userRole?: string
     ]);
 
   return {
-    totalAmount: Number(totalAmount[0]?.total || 0),
+    // Booked value = received amounts + amounts still outstanding
+    totalAmount: Number(totalAmount[0]?.total || 0) + Number(openPendingAmount[0]?.total || 0),
     receivedAmount: Number(receivedAmount[0]?.total || 0),
-    pendingAmount: Number(pendingAmount[0]?.total || 0),
+    // Legacy PENDING rows carry their amount; newer rows carry pendingAmount
+    pendingAmount: Number(pendingStatusAmount[0]?.total || 0) + Number(openPendingAmount[0]?.total || 0),
     partialAmount: Number(partialAmount[0]?.total || 0),
     totalCount: totalCount[0]?.count || 0,
     paidCount: paidCount[0]?.count || 0,
