@@ -90,9 +90,14 @@ export function TeamMemberPaymentsTable({
       ),
     },
     {
-      accessorKey: "transactionId",
-      header: "Transaction ID",
-      cell: ({ row }) => row.original.transactionId || "-",
+      accessorKey: "pendingAmount",
+      header: "Pending",
+      cell: ({ row }) =>
+        row.original.pendingAmount > 0 ? (
+          <span className="font-medium text-amber-600">{formatCurrency(row.original.pendingAmount)}</span>
+        ) : (
+          <span className="text-slate-400">-</span>
+        ),
     },
     {
       accessorKey: "remarks",

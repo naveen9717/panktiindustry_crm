@@ -12,7 +12,6 @@ interface CreatePaymentParams {
     paymentDate?: Date;
     paymentMode: string;
     paymentStatus?: string;
-    transactionId?: string;
     remarks?: string;
   };
   teamMemberId: string;
@@ -43,7 +42,6 @@ export async function createPayment({ db, data, teamMemberId, userId, ipAddress 
     paymentDate: data.paymentDate || new Date(),
     paymentMode: data.paymentMode as typeof payments.$inferSelect.paymentMode,
     paymentStatus: paymentStatus as typeof payments.$inferInsert.paymentStatus,
-    transactionId: data.transactionId || null,
     remarks: data.remarks || null,
   });
 
@@ -161,7 +159,6 @@ export async function getPayments({
     conditions.push(or(
         like(customers.name, `%${search}%`),
         like(customers.email, `%${search}%`),
-        like(payments.transactionId, `%${search}%`),
         like(payments.id, `%${search}%`)
       )!);
   }

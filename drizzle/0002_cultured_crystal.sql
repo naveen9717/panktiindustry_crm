@@ -1,0 +1,1 @@
+ALTER TABLE `payments` DROP COLUMN `transaction_id`;

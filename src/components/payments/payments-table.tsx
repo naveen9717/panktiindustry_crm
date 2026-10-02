@@ -10,7 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { KpiCard } from "@/components/dashboard/kpi-card";
-import { Plus, Filter, Download, IndianRupee, Clock, CreditCard, CheckCircle } from "lucide-react";
+import { ViewClientDialog } from "@/components/payments/view-client-dialog";
+import { Plus, Filter, Download, Eye, IndianRupee, Clock, CreditCard, CheckCircle } from "lucide-react";
 import type { Payment, User, Customer } from "@/db/schema";
 
 type PaymentWithRelations = Payment & {
@@ -63,6 +64,7 @@ export function PaymentsTable({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showFilters, setShowFilters] = React.useState(false);
+  const [viewCustomerId, setViewCustomerId] = React.useState<string | null>(null);
 
   const updateParams = (updates: Record<string, string>) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -103,6 +105,16 @@ export function PaymentsTable({
       ),
     },
     {
+      accessorKey: "pendingAmount",
+      header: "Pending",
+      cell: ({ row }) =>
+        row.original.pendingAmount > 0 ? (
+          <span className="font-medium text-amber-600">{formatCurrency(row.original.pendingAmount)}</span>
+        ) : (
+          <span className="text-slate-400">-</span>
+        ),
+    },
+    {
       accessorKey: "paymentDate",
       header: "Date",
       cell: ({ row }) => formatDate(row.original.paymentDate),
@@ -122,14 +134,23 @@ export function PaymentsTable({
       ),
     },
     {
-      accessorKey: "transactionId",
-      header: "Transaction ID",
-      cell: ({ row }) => row.original.transactionId || "-",
-    },
-    {
       accessorKey: "remarks",
       header: "Remarks",
       cell: ({ row }) => truncate(row.original.remarks, 30) || "-",
+    },
+    {
+      id: "actions",
+      header: "View",
+      cell: ({ row }) => (
+        <Button
+          variant="ghost"
+          size="icon"
+          title="View client details"
+          onClick={() => setViewCustomerId(row.original.customer.id)}
+        >
+          <Eye className="h-4 w-4" />
+        </Button>
+      ),
     },
   ];
 
@@ -152,6 +173,8 @@ export function PaymentsTable({
           </Button>
         </div>
       </div>
+
+      <ViewClientDialog customerId={viewCustomerId} onClose={() => setViewCustomerId(null)} />
 
       {/* Stats */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -253,11 +276,12 @@ export function PaymentsTable({
                 <th className="px-4 py-3 text-left font-medium text-slate-500">Customer</th>
                 <th className="px-4 py-3 text-left font-medium text-slate-500">Team Member</th>
                 <th className="px-4 py-3 text-left font-medium text-slate-500">Amount</th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">Pending</th>
                 <th className="px-4 py-3 text-left font-medium text-slate-500">Date</th>
                 <th className="px-4 py-3 text-left font-medium text-slate-500">Mode</th>
                 <th className="px-4 py-3 text-left font-medium text-slate-500">Status</th>
-                <th className="px-4 py-3 text-left font-medium text-slate-500">Transaction ID</th>
                 <th className="px-4 py-3 text-left font-medium text-slate-500">Remarks</th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">View</th>
               </tr>
             </thead>
             <tbody>
@@ -278,6 +302,9 @@ export function PaymentsTable({
                       {payment.teamMember.firstName} {payment.teamMember.lastName}
                     </td>
                     <td className="px-4 py-3 font-medium text-slate-900">{formatCurrency(payment.amount)}</td>
+                    <td className="px-4 py-3 font-medium text-amber-600">
+                      {payment.pendingAmount > 0 ? formatCurrency(payment.pendingAmount) : <span className="text-slate-400">-</span>}
+                    </td>
                     <td className="px-4 py-3 text-slate-600">{formatDate(payment.paymentDate)}</td>
                     <td className="px-4 py-3 text-slate-600">{payment.paymentMode.replace(/_/g, " ")}</td>
                     <td className="px-4 py-3">
@@ -285,8 +312,17 @@ export function PaymentsTable({
                         {payment.paymentStatus}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 text-slate-600">{payment.transactionId || "-"}</td>
                     <td className="px-4 py-3 text-slate-600">{truncate(payment.remarks, 30) || "-"}</td>
+                    <td className="px-4 py-3">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="View client details"
+                        onClick={() => setViewCustomerId(payment.customer.id)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </td>
                   </tr>
                 ))
               )}

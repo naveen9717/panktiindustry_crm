@@ -122,11 +122,6 @@ export function TeamPaymentsTable({
       ),
     },
     {
-      accessorKey: "transactionId",
-      header: "Transaction ID",
-      cell: ({ row }) => row.original.transactionId || "-",
-    },
-    {
       accessorKey: "remarks",
       header: "Remarks",
       cell: ({ row }) => truncate(row.original.remarks, 30) || "-",
@@ -217,14 +212,13 @@ export function TeamPaymentsTable({
                 <th className="px-4 py-3 text-left font-medium text-slate-500">Date</th>
                 <th className="px-4 py-3 text-left font-medium text-slate-500">Mode</th>
                 <th className="px-4 py-3 text-left font-medium text-slate-500">Status</th>
-                <th className="px-4 py-3 text-left font-medium text-slate-500">Transaction ID</th>
                 <th className="px-4 py-3 text-left font-medium text-slate-500">Remarks</th>
               </tr>
             </thead>
             <tbody>
               {payments.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-8 text-center text-slate-500">
+                  <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
                     No payments found
                   </td>
                 </tr>
@@ -246,7 +240,6 @@ export function TeamPaymentsTable({
                         {payment.paymentStatus}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 text-slate-600">{payment.transactionId || "-"}</td>
                     <td className="px-4 py-3 text-slate-600">{truncate(payment.remarks, 30) || "-"}</td>
                   </tr>
                 ))

@@ -122,7 +122,6 @@ async function seed() {
         paymentDate,
         paymentMode: paymentMode as typeof schema.payments.$inferInsert.paymentMode,
         paymentStatus: paymentStatus as typeof schema.payments.$inferInsert.paymentStatus,
-        transactionId: `TXN${Date.now()}${Math.floor(Math.random() * 1000)}`,
         remarks: Math.random() > 0.7 ? "Payment received on time" : null,
       });
     }

@@ -25,7 +25,6 @@ export const createPaymentSchema = z.object({
   paymentDate: z.string().optional(),
   paymentMode: paymentModeEnum.default("CASH"),
   paymentStatus: paymentStatusEnum.optional(),
-  transactionId: z.string().max(100).optional().or(z.literal("")),
   remarks: z.string().max(1000).optional().or(z.literal("")),
 });
 

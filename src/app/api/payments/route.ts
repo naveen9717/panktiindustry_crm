@@ -54,7 +54,6 @@ export async function POST(request: NextRequest) {
           : undefined,
         paymentMode: validated.data.paymentMode,
         paymentStatus: validated.data.paymentStatus,
-        transactionId: validated.data.transactionId,
         remarks: validated.data.remarks,
       },
       teamMemberId: user.id,
