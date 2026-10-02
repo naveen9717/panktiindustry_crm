@@ -11,6 +11,11 @@
 :root {
   --popup-bg: #ffffff;
   --popup-border: rgb(228 228 231);
+
+  /* Emerald brand accent (used by .btn-gradient + checkbox accents) */
+  --color-emerald-700: #047857;
+  --color-emerald-800: #065f46;
+  --color-emerald-900: #064e3b;
 }
 
 body {
@@ -30,14 +35,69 @@ body {
   color: rgba(255, 255, 255, 0.3);
 }
 
-/* Checkbox / radio accent (reference: wine light, rose dark) */
+/* Checkbox / radio accent (emerald to match primary buttons) */
 input[type="checkbox"],
 input[type="radio"] {
-  accent-color: #6b1f2e;
+  accent-color: var(--color-emerald-700, #047857);
 }
 .dark input[type="checkbox"],
 .dark input[type="radio"] {
-  accent-color: #c73659;
+  accent-color: var(--color-emerald-700, #047857);
+}
+
+/* ------------------------------------------------------------------ */
+/* Customer picker dropdown (Add Payment dialog). Solid fill so the     */
+/* form behind never bleeds through, elevated shadow, menu-style rows.  */
+/* ------------------------------------------------------------------ */
+.picker-menu {
+  background-color: #fdfbf7;
+  border: 1px solid #e7e5e4;
+  box-shadow: 0 18px 40px -18px rgba(28, 25, 23, 0.45);
+}
+.dark .picker-menu {
+  background-color: #1b1828;
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.95);
+}
+
+.picker-item {
+  text-transform: none;
+  letter-spacing: normal;
+  background-color: transparent;
+  transition: background-color 0.12s ease;
+}
+.picker-item:hover,
+.picker-item:focus-visible {
+  background-color: #f1efe9;
+  outline: none;
+}
+.dark .picker-item:hover,
+.dark .picker-item:focus-visible {
+  background-color: #221f33;
+}
+.picker-item.is-selected {
+  background-color: rgba(199, 54, 89, 0.07);
+}
+.dark .picker-item.is-selected {
+  background-color: rgba(199, 54, 89, 0.14);
+}
+
+.picker-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background-color: rgba(199, 54, 89, 0.1);
+  color: #c73659;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.dark .picker-avatar {
+  background-color: rgba(199, 54, 89, 0.2);
+  color: #e07090;
 }
 /* Uppercase only where it belongs: headings, brand, buttons, table heads.
    Body copy, labels, table cells and form fields keep their own casing. */
@@ -172,13 +232,13 @@ th {
 }
 .dark body {
   background-color: #0f0e17;
-  background-image: radial-gradient(ellipse at 65% 0%, #180a11, #110810, #0f0e17 60%, #1c1b2e);
+  background-image: radial-gradient(ellipse at 65% 0%, #16290f, #0d1610, #0f0e17 60%, #1c1b2e);
   color: #e5e5e5;
 }
 .dark .bg-page {
   background-color: #0a0912;
   color: #e5e5e5;
-  background-image: radial-gradient(at 60% 40%, rgb(45, 13, 24) 0%, rgb(26, 10, 20) 35%, rgb(13, 12, 26) 70%, rgb(10, 9, 18) 100%);
+  background-image: radial-gradient(at 60% 40%, #1a3014 0%, #0a1a11 35%, #0d0c1a 70%, #0a0912 100%);
 }
 
 /* ---- Header (glass) ---- */
@@ -235,19 +295,19 @@ h1 {
   box-shadow: 0 6px 16px -8px rgba(124, 58, 237, 0.85);
 }
 
-/* ---- Primary buttons (brand accent) ---- */
+/* ---- Primary buttons (brand accent: emerald) ---- */
 .btn-gradient {
-  background-color: #c73659;
-  color: #ffffff;
-  box-shadow: 0 4px 14px -6px rgba(199, 54, 89, 0.75);
-  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+  color: #fff;
+  background-color: var(--color-emerald-700, #047857);
+  transition: background-color .15s, box-shadow .15s;
+  box-shadow: 0 4px 14px -6px var(--color-emerald-700, #047857);
 }
 .btn-gradient:hover {
-  background-color: #a82d4a;
-  box-shadow: 0 6px 18px -6px rgba(199, 54, 89, 0.8);
+  background-color: var(--color-emerald-800, #065f46);
+  box-shadow: 0 6px 18px -6px var(--color-emerald-700, #047857);
 }
 .btn-gradient:active {
-  background-color: #8f2540;
+  background-color: var(--color-emerald-900, #064e3b);
 }
 
 /* ---- Cards: soft elevation + subtle sheen ---- */

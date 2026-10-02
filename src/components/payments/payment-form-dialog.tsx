@@ -19,6 +19,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Check, Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const paymentFormSchema = z
   .object({
@@ -50,6 +52,13 @@ const MODE_OPTIONS = [
 ];
 
 const today = () => new Date().toISOString().slice(0, 10);
+const initials = (name: string) =>
+  name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
 const numberOrZero = (value: unknown) => {
   const n = Number(value);
   return value === "" || value === null || value === undefined || Number.isNaN(n) ? 0 : n;
@@ -75,6 +84,7 @@ export function PaymentFormDialog({ open, onOpenChange }: PaymentFormDialogProps
     handleSubmit,
     reset,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<PaymentFormValues>({
     resolver: zodResolver(paymentFormSchema),
@@ -87,6 +97,8 @@ export function PaymentFormDialog({ open, onOpenChange }: PaymentFormDialogProps
       remarks: "",
     },
   });
+
+  const selectedCustomerId = watch("customerId");
 
   const fetchCustomers = React.useCallback(async (search: string) => {
     setSearching(true);
@@ -181,8 +193,13 @@ export function PaymentFormDialog({ open, onOpenChange }: PaymentFormDialogProps
             <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="customer">Customer *</Label>
               <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
                   id="customer"
+                  className="pl-9"
+                  role="combobox"
+                  aria-expanded={showList}
+                  aria-controls="customer-listbox"
                   autoComplete="off"
                   placeholder="Search customer by name, email or phone"
                   value={query}
@@ -195,28 +212,45 @@ export function PaymentFormDialog({ open, onOpenChange }: PaymentFormDialogProps
                   error={!!errors.customerId}
                 />
                 {showList && (
-                  <ul className="absolute left-0 right-0 top-full z-20 mt-1 max-h-56 overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg">
+                  <ul
+                    id="customer-listbox"
+                    role="listbox"
+                    aria-label="Customers"
+                    className="picker-menu absolute left-0 right-0 top-full z-30 mt-1.5 max-h-60 overflow-y-auto rounded-xl py-1"
+                  >
                     {searching && options.length === 0 && (
-                      <li className="px-3 py-2 text-xs text-slate-500">Searching…</li>
+                      <li className="px-3.5 py-3 text-xs text-slate-500">Searching…</li>
                     )}
                     {!searching && options.length === 0 && (
-                      <li className="px-3 py-2 text-xs text-slate-500">No customers found</li>
+                      <li className="px-3.5 py-3 text-xs text-slate-500">No customers found</li>
                     )}
-                    {options.map((customer) => (
-                      <li key={customer.id}>
-                        <button
-                          type="button"
-                          className="flex w-full flex-col items-start px-3 py-2 text-left transition-colors hover:bg-slate-50"
-                          onMouseDown={(e) => e.preventDefault()}
-                          onClick={() => selectCustomer(customer)}
-                        >
-                          <span className="text-sm font-medium text-slate-900">{customer.name}</span>
-                          <span className="text-xs text-slate-500">
-                            {customer.email || customer.phone || ""}
-                          </span>
-                        </button>
-                      </li>
-                    ))}
+                    {options.map((customer) => {
+                      const isSelected = customer.id === selectedCustomerId;
+                      return (
+                        <li key={customer.id} role="option" aria-selected={isSelected}>
+                          <button
+                            type="button"
+                            className={cn(
+                              "picker-item flex w-full items-center gap-3 px-3 py-2.5 text-left",
+                              isSelected && "is-selected"
+                            )}
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => selectCustomer(customer)}
+                          >
+                            <span className="picker-avatar">{initials(customer.name)}</span>
+                            <span className="min-w-0 flex-1">
+                              <span className="block truncate text-sm font-medium text-slate-900">
+                                {customer.name}
+                              </span>
+                              <span className="block truncate text-xs text-slate-500">
+                                {customer.email || customer.phone || ""}
+                              </span>
+                            </span>
+                            {isSelected && <Check className="h-4 w-4 shrink-0 text-[#c73659]" />}
+                          </button>
+                        </li>
+                      );
+                    })}
                   </ul>
                 )}
               </div>
