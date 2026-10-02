@@ -7,7 +7,7 @@ import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Building2, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -74,13 +74,17 @@ export function LoginForm() {
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <div className="mb-4 flex justify-center">
-            <div className="btn-gradient flex h-12 w-12 items-center justify-center rounded-xl">
-              <Building2 className="h-6 w-6 text-white" />
-            </div>
+            <img
+              src="/pankti-logo.png"
+              alt="PANKTIINDUSTRY"
+              width={509}
+              height={509}
+              className="brand-logo h-16 w-16"
+            />
           </div>
           <h1 className="text-2xl font-bold text-slate-900">WELCOME BACK</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Sign in to your PANKTIINDUSTRY CRM
+          <p className="mt-1 text-sm uppercase text-slate-500">
+            Sign in to your <span className="brand-wordmark">PANKTIINDUSTRY</span> CRM
           </p>
         </div>
 
