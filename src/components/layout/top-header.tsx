@@ -61,7 +61,7 @@ export function TopHeader({ user, onMenuClick, onLogout }: TopHeaderProps) {
     >
       <Bell className="h-5 w-5" />
       {unread > 0 && (
-        <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-semibold leading-none text-white">
+        <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-emerald-600 px-1 text-[10px] font-semibold leading-none text-white">
           {unread > 9 ? "9+" : unread}
         </span>
       )}
@@ -92,7 +92,7 @@ export function TopHeader({ user, onMenuClick, onLogout }: TopHeaderProps) {
             <div className="flex items-center justify-between border-b border-slate-200 px-4 py-2.5">
               <p className="text-sm font-semibold text-slate-900">Notifications</p>
               {unread > 0 && (
-                <span className="rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-semibold text-white">
+                <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-semibold text-white">
                   {unread} new
                 </span>
               )}
@@ -108,7 +108,7 @@ export function TopHeader({ user, onMenuClick, onLogout }: TopHeaderProps) {
                     key={n.id}
                     className="flex items-start gap-3 border-b border-slate-100 px-4 py-3 last:border-0 hover:bg-slate-50"
                   >
-                    <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-rose-500" />
+                    <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-emerald-600" />
                     <div className="min-w-0 flex-1">
                       <p className="text-sm text-slate-900">
                         {n.description || `${n.actor} performed ${n.action}`}
@@ -150,7 +150,7 @@ export function TopHeader({ user, onMenuClick, onLogout }: TopHeaderProps) {
         {/* User */}
         <div className="mx-1 hidden h-8 w-px bg-slate-200 sm:block" />
         <div className="flex items-center gap-2.5 pr-1">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose-500 text-sm font-semibold text-white">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-sm font-semibold text-white">
             {getInitials(user.firstName, user.lastName)}
           </div>
           <div className="hidden md:block">
