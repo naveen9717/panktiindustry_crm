@@ -100,6 +100,21 @@ input[type="radio"] {
   background-color: rgba(16, 185, 129, 0.2);
   color: #34d399;
 }
+
+/* ---- Select caret: custom chevron, vertically centered with a little
+       breathing room from the right edge (the native arrow hugs it).
+       The grouped .dark selector wins over .dark .bg-white's
+       background-image sheen so the caret shows in dark mode too. ---- */
+select,
+.dark select.bg-white {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 2.25rem;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a8a29e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 14px 14px;
+}
 /* Uppercase only where it belongs: headings, brand, buttons, table heads.
    Body copy, labels, table cells and form fields keep their own casing. */
 h1,
