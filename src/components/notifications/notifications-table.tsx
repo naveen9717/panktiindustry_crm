@@ -50,7 +50,7 @@ export function NotificationsTable({ page }: NotificationsTableProps) {
   const columns: ColumnDef<Notification, any>[] = [
     {
       accessorKey: "actor",
-      header: "Actor",
+      header: "Team Member",
       cell: ({ row }) => (
         <span className="font-medium text-slate-900">{row.original.actor}</span>
       ),
