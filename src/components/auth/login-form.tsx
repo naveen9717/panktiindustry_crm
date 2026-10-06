@@ -79,7 +79,7 @@ export function LoginForm() {
               alt="PANKTIINDUSTRY"
               width={509}
               height={509}
-              className="brand-logo h-16 w-16"
+              className="brand-logo h-[100px] w-[100px]"
             />
           </div>
           <h1 className="text-2xl font-bold text-slate-900">WELCOME BACK</h1>
