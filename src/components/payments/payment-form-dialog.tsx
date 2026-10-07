@@ -54,7 +54,7 @@ interface TeamMemberOption {
 const MODE_OPTIONS = [
   { value: "CASH", label: "Cash" },
   { value: "UPI", label: "UPI" },
-  { value: "BANK_TRANSFER", label: "NEFT" },
+  { value: "BANK_TRANSFER", label: "Bank Transfer" },
 ];
 
 const today = () => new Date().toISOString().slice(0, 10);
