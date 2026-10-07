@@ -1,6 +1,7 @@
 import type { DB } from "@/db";
 import { customers, users, payments } from "@/db/schema";
 import { eq, and, sql, count, sum, desc, inArray, type SQL } from "drizzle-orm";
+import { paymentsOnAssignedCustomers } from "@/lib/services/payment";
 
 interface DashboardStatsParams {
   db: DB;
@@ -51,15 +52,17 @@ export async function getAdminDashboardStats({ db }: DashboardStatsParams) {
 }
 
 export async function getTeamMemberDashboardStats({ db, userId }: DashboardStatsParams) {
-  const conditions: SQL[] = [eq(customers.assignedTeamMemberId, userId!)];
-  const whereClause = and(...conditions);
+  const whereClause = eq(customers.assignedTeamMemberId, userId!);
+  // Payment visibility follows the customer assignment, not the payment's teamMemberId stamp
+  const myPayments = paymentsOnAssignedCustomers(userId!);
 
   const [
     myLeads,
     activeLeads,
     convertedLeads,
-    pendingPayments,
-    paymentsReceived,
+    receivedAmount,
+    pendingStatusAmount,
+    openPendingAmount,
   ] = await Promise.all([
     db.select({ count: count() }).from(customers).where(whereClause),
     db.select({ count: count() }).from(customers).where(
@@ -71,12 +74,15 @@ export async function getTeamMemberDashboardStats({ db, userId }: DashboardStats
     db.select({ count: count() }).from(customers).where(
       and(eq(customers.assignedTeamMemberId, userId!), eq(customers.leadStatus, "CONVERTED"))
     ),
+    // Money in: fully paid + the received part of partial payments
     db.select({ total: sum(payments.amount) }).from(payments).where(
-      and(eq(payments.teamMemberId, userId!), eq(payments.paymentStatus, "PENDING"))
+      and(myPayments, inArray(payments.paymentStatus, ["PAID", "PARTIAL"]))
     ),
+    // Outstanding: legacy PENDING rows carry their amount, every row carries pendingAmount
     db.select({ total: sum(payments.amount) }).from(payments).where(
-      and(eq(payments.teamMemberId, userId!), eq(payments.paymentStatus, "PAID"))
+      and(myPayments, eq(payments.paymentStatus, "PENDING"))
     ),
+    db.select({ total: sum(payments.pendingAmount) }).from(payments).where(myPayments),
   ]);
 
   return {
@@ -84,8 +90,9 @@ export async function getTeamMemberDashboardStats({ db, userId }: DashboardStats
     myLeads: myLeads[0]?.count || 0,
     activeLeads: activeLeads[0]?.count || 0,
     convertedLeads: convertedLeads[0]?.count || 0,
-    pendingPayments: Number(pendingPayments[0]?.total || 0),
-    paymentsReceived: Number(paymentsReceived[0]?.total || 0),
+    pendingPayments:
+      Number(pendingStatusAmount[0]?.total || 0) + Number(openPendingAmount[0]?.total || 0),
+    paymentsReceived: Number(receivedAmount[0]?.total || 0),
   };
 }
 
@@ -110,7 +117,7 @@ export async function getRecentLeads(db: DB, limit = 5, userId?: string, userRol
 export async function getRecentPayments(db: DB, limit = 5, userId?: string, userRole?: string) {
   const conditions: SQL[] = [];
   if (userRole === "TEAM_MEMBER" && userId) {
-    conditions.push(eq(payments.teamMemberId, userId));
+    conditions.push(paymentsOnAssignedCustomers(userId));
   }
 
   return db.query.payments.findMany({

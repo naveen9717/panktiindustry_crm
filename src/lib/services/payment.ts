@@ -3,6 +3,20 @@ import { payments, customers } from "@/db/schema";
 import { eq, and, or, like, desc, asc, sql, count, sum, inArray, type SQL } from "drizzle-orm";
 import { logActivity } from "./activity";
 
+/**
+ * Payments recorded on customers assigned to this team member.
+ * Team members' payment views follow their book of business (the customer's
+ * assignment), not the payment's teamMemberId stamp — a reassigned customer's
+ * history belongs to whoever the customer is assigned to now.
+ */
+export function paymentsOnAssignedCustomers(userId: string): SQL {
+  return sql`EXISTS (
+    SELECT 1 FROM customers
+    WHERE customers.id = ${payments.customerId}
+      AND customers.assigned_team_member_id = ${userId}
+  )`;
+}
+
 interface CreatePaymentParams {
   db: DB;
   data: {
@@ -264,7 +278,7 @@ export async function getPaymentStats(db: DB, userId?: string, userRole?: string
 export async function getPaymentsOverTime(db: DB, userId?: string, userRole?: string, days = 30) {
   const conditions: SQL[] = [];
   if (userRole === "TEAM_MEMBER" && userId) {
-    conditions.push(eq(payments.teamMemberId, userId));
+    conditions.push(paymentsOnAssignedCustomers(userId));
   }
 
   const startDate = new Date();
