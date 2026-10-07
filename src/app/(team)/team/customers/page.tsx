@@ -12,6 +12,10 @@ interface PageProps {
     page?: string;
     search?: string;
     leadStatus?: string;
+    state?: string;
+    city?: string;
+    dateFrom?: string;
+    dateTo?: string;
   }>;
 }
 
@@ -31,12 +35,20 @@ export default async function TeamCustomersPage({ searchParams }: PageProps) {
   const page = parseInt(params.page || "1");
   const search = params.search || "";
   const leadStatus = params.leadStatus || "";
+  const state = params.state || "";
+  const city = params.city || "";
+  const dateFrom = params.dateFrom || "";
+  const dateTo = params.dateTo || "";
 
   const data = await getCustomers({ db, 
     page,
     pageSize: 10,
     search,
     leadStatus,
+    state,
+    city,
+    dateFrom,
+    dateTo,
     userId: user.id,
     userRole: user.role,
   });
@@ -50,7 +62,7 @@ export default async function TeamCustomersPage({ searchParams }: PageProps) {
           page={data.page}
           pageSize={data.pageSize}
           totalPages={data.totalPages}
-          currentFilters={{ search, leadStatus }}
+          currentFilters={{ search, leadStatus, state, city, dateFrom, dateTo }}
         />
       </div>
     </TeamLayout>

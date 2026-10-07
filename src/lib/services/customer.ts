@@ -274,7 +274,8 @@ export async function getCustomers({
     conditions.push(sql`${customers.createdAt} >= ${Math.floor(new Date(dateFrom).getTime() / 1000)}`);
   }
   if (dateTo) {
-    conditions.push(sql`${customers.createdAt} <= ${Math.floor(new Date(dateTo).getTime() / 1000)}`);
+    // Date inputs give midnight UTC; include the whole selected day.
+    conditions.push(sql`${customers.createdAt} <= ${Math.floor(new Date(dateTo).getTime() / 1000) + 86399}`);
   }
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
