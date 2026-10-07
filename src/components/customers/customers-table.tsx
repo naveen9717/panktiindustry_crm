@@ -95,16 +95,6 @@ export function CustomersTable({
       cell: ({ row }) => row.original.phone || "-",
     },
     {
-      accessorKey: "city",
-      header: "City",
-      cell: ({ row }) => row.original.city || "-",
-    },
-    {
-      accessorKey: "state",
-      header: "State",
-      cell: ({ row }) => row.original.state || "-",
-    },
-    {
       accessorKey: "leadStatus",
       header: "Status",
       cell: ({ row }) => (
