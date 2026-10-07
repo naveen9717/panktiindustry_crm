@@ -1,6 +1,6 @@
 import type { DB } from "@/db";
 import { customers, users, payments } from "@/db/schema";
-import { eq, and, sql, count, sum, desc, type SQL } from "drizzle-orm";
+import { eq, and, sql, count, sum, desc, inArray, type SQL } from "drizzle-orm";
 
 interface DashboardStatsParams {
   db: DB;
@@ -14,9 +14,10 @@ export async function getAdminDashboardStats({ db }: DashboardStatsParams) {
     totalTeamMembers,
     activeLeads,
     convertedLeads,
-    pendingPayments,
-    paymentsReceived,
-    totalRevenue,
+    receivedAmount,
+    pendingStatusAmount,
+    openPendingAmount,
+    bookedAmount,
   ] = await Promise.all([
     db.select({ count: count() }).from(customers),
     db.select({ count: count() }).from(users).where(
@@ -26,9 +27,15 @@ export async function getAdminDashboardStats({ db }: DashboardStatsParams) {
       sql`${customers.leadStatus} IN ('NEW', 'CONTACTED', 'FOLLOW_UP', 'INTERESTED', 'QUALIFIED', 'PROPOSAL_SENT', 'NEGOTIATION')`
     ),
     db.select({ count: count() }).from(customers).where(eq(customers.leadStatus, "CONVERTED")),
+    // Money in: fully paid + the received part of partial payments
+    db.select({ total: sum(payments.amount) }).from(payments).where(
+      inArray(payments.paymentStatus, ["PAID", "PARTIAL"])
+    ),
+    // Outstanding: legacy PENDING rows carry their amount, every row carries pendingAmount
     db.select({ total: sum(payments.amount) }).from(payments).where(eq(payments.paymentStatus, "PENDING")),
-    db.select({ total: sum(payments.amount) }).from(payments).where(eq(payments.paymentStatus, "PAID")),
-    db.select({ total: sum(payments.amount) }).from(payments).where(eq(payments.paymentStatus, "PAID")),
+    db.select({ total: sum(payments.pendingAmount) }).from(payments),
+    // Booked value = received + outstanding (every team member's customers)
+    db.select({ total: sum(payments.amount) }).from(payments),
   ]);
 
   return {
@@ -36,9 +43,10 @@ export async function getAdminDashboardStats({ db }: DashboardStatsParams) {
     totalTeamMembers: totalTeamMembers[0]?.count || 0,
     activeLeads: activeLeads[0]?.count || 0,
     convertedLeads: convertedLeads[0]?.count || 0,
-    pendingPayments: Number(pendingPayments[0]?.total || 0),
-    paymentsReceived: Number(paymentsReceived[0]?.total || 0),
-    totalRevenue: Number(totalRevenue[0]?.total || 0),
+    pendingPayments:
+      Number(pendingStatusAmount[0]?.total || 0) + Number(openPendingAmount[0]?.total || 0),
+    paymentsReceived: Number(receivedAmount[0]?.total || 0),
+    totalRevenue: Number(bookedAmount[0]?.total || 0) + Number(openPendingAmount[0]?.total || 0),
   };
 }
 
