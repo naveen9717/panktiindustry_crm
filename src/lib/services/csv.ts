@@ -32,7 +32,7 @@ export interface ColumnMapping {
 type LeadStatus = Customer["leadStatus"];
 
 const VALID_LEAD_STATUSES: LeadStatus[] = [
-  "NEW", "CONTACTED", "FOLLOW_UP", "INTERESTED", "QUALIFIED",
+  "NEW", "CONTACTED", "FOLLOW_UP", "MORE_DETAILS_SEND", "RINGING", "PHONE_OFF", "BUSY", "INTERESTED", "QUALIFIED",
   "PROPOSAL_SENT", "NEGOTIATION", "CONVERTED", "LOST", "NOT_INTERESTED",
 ];
 

@@ -51,7 +51,7 @@ async function seed() {
   const lastNames = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin"];
   const cities = ["Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai", "Kolkata", "Pune", "Ahmedabad", "Jaipur", "Lucknow"];
   const states = ["Maharashtra", "Delhi", "Karnataka", "Telangana", "Tamil Nadu", "West Bengal", "Gujarat", "Rajasthan", "Uttar Pradesh"];
-  const leadStatuses = ["NEW", "CONTACTED", "FOLLOW_UP", "INTERESTED", "QUALIFIED", "PROPOSAL_SENT", "NEGOTIATION", "CONVERTED", "LOST", "NOT_INTERESTED"];
+  const leadStatuses = ["NEW", "CONTACTED", "FOLLOW_UP", "MORE_DETAILS_SEND", "RINGING", "PHONE_OFF", "BUSY", "INTERESTED", "QUALIFIED", "PROPOSAL_SENT", "NEGOTIATION", "CONVERTED", "LOST", "NOT_INTERESTED"];
   const campaigns = ["Summer Sale 2026", "Diwali Special", "New Product Launch", "Brand Awareness", "Retargeting Campaign"];
   const adsets = ["Ad Set A", "Ad Set B", "Ad Set C", "Ad Set D"];
   const ads = ["Ad Creative 1", "Ad Creative 2", "Ad Creative 3", "Ad Creative 4"];

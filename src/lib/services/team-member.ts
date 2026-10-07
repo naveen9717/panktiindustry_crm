@@ -212,7 +212,7 @@ export async function getTeamMembers({
         db.select({ count: count() }).from(customers).where(
           and(
             eq(customers.assignedTeamMemberId, member.id),
-            sql`${customers.leadStatus} IN ('NEW', 'CONTACTED', 'FOLLOW_UP', 'INTERESTED', 'QUALIFIED', 'PROPOSAL_SENT', 'NEGOTIATION')`
+            sql`${customers.leadStatus} IN ('NEW', 'CONTACTED', 'FOLLOW_UP', 'MORE_DETAILS_SEND', 'RINGING', 'PHONE_OFF', 'BUSY', 'INTERESTED', 'QUALIFIED', 'PROPOSAL_SENT', 'NEGOTIATION')`
           )
         ),
         db.select({ count: count() }).from(customers).where(
@@ -269,7 +269,7 @@ export async function getTeamMemberById(db: DB, id: string) {
     db.select({ count: count() }).from(customers).where(
       and(
         eq(customers.assignedTeamMemberId, id),
-        sql`${customers.leadStatus} IN ('NEW', 'CONTACTED', 'FOLLOW_UP', 'INTERESTED', 'QUALIFIED', 'PROPOSAL_SENT', 'NEGOTIATION')`
+        sql`${customers.leadStatus} IN ('NEW', 'CONTACTED', 'FOLLOW_UP', 'MORE_DETAILS_SEND', 'RINGING', 'PHONE_OFF', 'BUSY', 'INTERESTED', 'QUALIFIED', 'PROPOSAL_SENT', 'NEGOTIATION')`
       )
     ),
     db.select({ count: count() }).from(customers).where(

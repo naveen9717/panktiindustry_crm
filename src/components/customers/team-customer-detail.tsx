@@ -35,7 +35,7 @@ const remarksSchema = z.object({
 
 const statusSchema = z.object({
   leadStatus: z.enum([
-    "NEW", "CONTACTED", "FOLLOW_UP", "INTERESTED", "QUALIFIED",
+    "NEW", "CONTACTED", "FOLLOW_UP", "MORE_DETAILS_SEND", "RINGING", "PHONE_OFF", "BUSY", "INTERESTED", "QUALIFIED",
     "PROPOSAL_SENT", "NEGOTIATION", "CONVERTED", "LOST", "NOT_INTERESTED",
   ]),
 });
@@ -371,6 +371,10 @@ export function TeamCustomerDetail({ customer, user }: TeamCustomerDetailProps) 
                 <option value="NEW">New</option>
                 <option value="CONTACTED">Contacted</option>
                 <option value="FOLLOW_UP">Follow Up</option>
+                <option value="MORE_DETAILS_SEND">More Details Send</option>
+                <option value="RINGING">Ringing</option>
+                <option value="PHONE_OFF">Phone Off</option>
+                <option value="BUSY">Busy</option>
                 <option value="INTERESTED">Interested</option>
                 <option value="QUALIFIED">Qualified</option>
                 <option value="PROPOSAL_SENT">Proposal Sent</option>

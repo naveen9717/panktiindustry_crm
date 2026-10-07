@@ -25,7 +25,7 @@ export async function getAdminDashboardStats({ db }: DashboardStatsParams) {
       and(eq(users.role, "TEAM_MEMBER"), eq(users.status, "ACTIVE"))
     ),
     db.select({ count: count() }).from(customers).where(
-      sql`${customers.leadStatus} IN ('NEW', 'CONTACTED', 'FOLLOW_UP', 'INTERESTED', 'QUALIFIED', 'PROPOSAL_SENT', 'NEGOTIATION')`
+      sql`${customers.leadStatus} IN ('NEW', 'CONTACTED', 'FOLLOW_UP', 'MORE_DETAILS_SEND', 'RINGING', 'PHONE_OFF', 'BUSY', 'INTERESTED', 'QUALIFIED', 'PROPOSAL_SENT', 'NEGOTIATION')`
     ),
     db.select({ count: count() }).from(customers).where(eq(customers.leadStatus, "CONVERTED")),
     // Money in: fully paid + the received part of partial payments
@@ -68,7 +68,7 @@ export async function getTeamMemberDashboardStats({ db, userId }: DashboardStats
     db.select({ count: count() }).from(customers).where(
       and(
         eq(customers.assignedTeamMemberId, userId!),
-        sql`${customers.leadStatus} IN ('NEW', 'CONTACTED', 'FOLLOW_UP', 'INTERESTED', 'QUALIFIED', 'PROPOSAL_SENT', 'NEGOTIATION')`
+        sql`${customers.leadStatus} IN ('NEW', 'CONTACTED', 'FOLLOW_UP', 'MORE_DETAILS_SEND', 'RINGING', 'PHONE_OFF', 'BUSY', 'INTERESTED', 'QUALIFIED', 'PROPOSAL_SENT', 'NEGOTIATION')`
       )
     ),
     db.select({ count: count() }).from(customers).where(

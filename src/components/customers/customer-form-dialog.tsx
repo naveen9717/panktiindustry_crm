@@ -22,7 +22,7 @@ const customerSchema = z.object({
   state: z.string().optional().or(z.literal("")),
   city: z.string().optional().or(z.literal("")),
   leadStatus: z.enum([
-    "NEW", "CONTACTED", "FOLLOW_UP", "INTERESTED", "QUALIFIED",
+    "NEW", "CONTACTED", "FOLLOW_UP", "MORE_DETAILS_SEND", "RINGING", "PHONE_OFF", "BUSY", "INTERESTED", "QUALIFIED",
     "PROPOSAL_SENT", "NEGOTIATION", "CONVERTED", "LOST", "NOT_INTERESTED",
   ]),
   source: z.string().optional().or(z.literal("")),
@@ -153,6 +153,10 @@ export function CustomerFormDialog({ open, onOpenChange, customer, teamMembers }
                 <option value="NEW">New</option>
                 <option value="CONTACTED">Contacted</option>
                 <option value="FOLLOW_UP">Follow Up</option>
+                <option value="MORE_DETAILS_SEND">More Details Send</option>
+                <option value="RINGING">Ringing</option>
+                <option value="PHONE_OFF">Phone Off</option>
+                <option value="BUSY">Busy</option>
                 <option value="INTERESTED">Interested</option>
                 <option value="QUALIFIED">Qualified</option>
                 <option value="PROPOSAL_SENT">Proposal Sent</option>

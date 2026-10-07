@@ -46,6 +46,10 @@ export function getLeadStatusBadgeVariant(status: string): "default" | "secondar
     case "CONVERTED": return "success";
     case "LOST": return "destructive";
     case "NOT_INTERESTED": return "destructive";
+    case "MORE_DETAILS_SEND": return "info";
+    case "RINGING": return "info";
+    case "PHONE_OFF": return "warning";
+    case "BUSY": return "warning";
     default: return "secondary";
   }
 }

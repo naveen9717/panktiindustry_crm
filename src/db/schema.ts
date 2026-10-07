@@ -26,7 +26,7 @@ export const customers = sqliteTable("customers", {
   state: text("state"),
   city: text("city"),
   leadStatus: text("lead_status", {
-    enum: ["NEW", "CONTACTED", "FOLLOW_UP", "INTERESTED", "QUALIFIED", "PROPOSAL_SENT", "NEGOTIATION", "CONVERTED", "LOST", "NOT_INTERESTED"]
+    enum: ["NEW", "CONTACTED", "FOLLOW_UP", "MORE_DETAILS_SEND", "RINGING", "PHONE_OFF", "BUSY", "INTERESTED", "QUALIFIED", "PROPOSAL_SENT", "NEGOTIATION", "CONVERTED", "LOST", "NOT_INTERESTED"]
   }).notNull().default("NEW"),
   source: text("source"),
   campaignName: text("campaign_name"),
