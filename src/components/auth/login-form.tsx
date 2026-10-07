@@ -79,7 +79,7 @@ export function LoginForm() {
               alt="PANKTIINDUSTRY"
               width={509}
               height={509}
-              className="brand-logo h-[100px] w-[100px]"
+              className="brand-logo h-[150px] w-[150px]"
             />
           </div>
           <h1 className="text-2xl font-bold text-slate-900">WELCOME BACK</h1>
@@ -152,10 +152,6 @@ export function LoginForm() {
             </Button>
           </form>
         </div>
-
-        <p className="mt-6 text-center text-xs text-slate-400">
-          Development credentials: panktiindustry@gmail.com / Panktiindustry@123456
-        </p>
       </div>
     </div>
   );
