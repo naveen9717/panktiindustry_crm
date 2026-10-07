@@ -37,6 +37,19 @@ const VALID_LEAD_STATUSES: LeadStatus[] = [
 ];
 
 /** "In progress" → "IN_PROGRESS"; returns null when not a known status. */
+/**
+ * Meta Ads CSV phone cells arrive as "p:+918878847514". Strip the leading
+ * "p:" marker and the +91 / 0091 / 91 country code so we store a plain
+ * number — the prefix must never end up in the phone field.
+ */
+function normalizePhone(raw: string | null): string | null {
+  if (!raw) return null;
+  let phone = raw.trim().replace(/^p:\s*/i, "").trim();
+  phone = phone.replace(/^\+91\s*/, "").replace(/^0091/, "");
+  if (/^91\d{10}$/.test(phone)) phone = phone.slice(2);
+  return phone || null;
+}
+
 function normalizeLeadStatus(value: string | null): LeadStatus | null {
   if (!value) return null;
   const normalized = value.trim().toUpperCase().replace(/[\s-]+/g, "_") as LeadStatus;
@@ -254,7 +267,7 @@ export async function importCustomers({
 
       const metaLeadId = getFieldValue("meta_lead_id");
       const email = getFieldValue("email");
-      const phone = getFieldValue("phone");
+      const phone = normalizePhone(getFieldValue("phone"));
       const name = getFieldValue("name") || "";
 
       // Check for duplicates
