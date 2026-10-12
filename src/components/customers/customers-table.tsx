@@ -13,6 +13,7 @@ import { DataTable } from "@/components/tables/data-table";
 import { CustomerFormDialog } from "./customer-form-dialog";
 import { DeleteCustomerDialog } from "./delete-customer-dialog";
 import { ImportDialog } from "./import-dialog";
+import { BulkActionsBar } from "./bulk-actions";
 import { Eye, Pencil, Trash2, Plus, Filter, Download, Upload } from "lucide-react";
 import type { Customer, User } from "@/db/schema";
 
@@ -62,6 +63,7 @@ export function CustomersTable({
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
   const [showImportDialog, setShowImportDialog] = React.useState(false);
   const [selectedCustomer, setSelectedCustomer] = React.useState<CustomerWithRelations | null>(null);
+  const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
 
   const updateParams = (updates: Record<string, string>) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -78,7 +80,53 @@ export function CustomersTable({
     router.push(`/admin/customers?${params.toString()}`);
   };
 
+  const pageIds = customers.map((c) => c.id);
+  const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selectedIds.has(id));
+
+  const toggleRow = (id: string) =>
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+
+  const toggleAllPage = () =>
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (allPageSelected) {
+        pageIds.forEach((id) => next.delete(id));
+      } else {
+        pageIds.forEach((id) => next.add(id));
+      }
+      return next;
+    });
+
   const columns: ColumnDef<CustomerWithRelations, any>[] = [
+    {
+      id: "select",
+      header: () => (
+        <input
+          type="checkbox"
+          aria-label="Select all customers on this page"
+          checked={allPageSelected}
+          onChange={toggleAllPage}
+          className="h-4 w-4 rounded border-slate-300 accent-emerald-600"
+        />
+      ),
+      cell: ({ row }) => (
+        <input
+          type="checkbox"
+          aria-label={`Select ${row.original.name}`}
+          checked={selectedIds.has(row.original.id)}
+          onChange={() => toggleRow(row.original.id)}
+          className="h-4 w-4 rounded border-slate-300 accent-emerald-600"
+        />
+      ),
+    },
     {
       accessorKey: "name",
       header: "Name",
@@ -261,6 +309,17 @@ export function CustomersTable({
           </div>
         </div>
       )}
+
+      {/* Bulk actions (multi-select delete / assign) */}
+      <BulkActionsBar
+        ids={[...selectedIds]}
+        teamMembers={teamMembers}
+        onClear={() => setSelectedIds(new Set())}
+        onDone={() => {
+          setSelectedIds(new Set());
+          router.refresh();
+        }}
+      />
 
       {/* Table */}
       <DataTable

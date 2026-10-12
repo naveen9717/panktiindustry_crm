@@ -53,9 +53,16 @@ export const deleteCustomerSchema = z.object({
   id: z.string().min(1, "Customer ID is required"),
 });
 
+export const bulkCustomerActionSchema = z.object({
+  action: z.enum(["delete", "assign"]),
+  ids: z.array(z.string().min(1)).min(1, "Select at least one customer").max(100),
+  assignedTeamMemberId: z.string().optional().or(z.literal("")),
+});
+
 export type CreateCustomerInput = z.infer<typeof createCustomerSchema>;
 export type UpdateCustomerInput = z.infer<typeof updateCustomerSchema>;
 export type UpdateCustomerRemarksInput = z.infer<typeof updateCustomerRemarksSchema>;
 export type UpdateCustomerStatusInput = z.infer<typeof updateCustomerStatusSchema>;
 export type AssignCustomerInput = z.infer<typeof assignCustomerSchema>;
 export type DeleteCustomerInput = z.infer<typeof deleteCustomerSchema>;
+export type BulkCustomerActionInput = z.infer<typeof bulkCustomerActionSchema>;

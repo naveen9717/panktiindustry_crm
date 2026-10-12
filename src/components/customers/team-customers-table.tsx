@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Dialog, DialogHeader, DialogTitle, DialogContent, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { DataTable } from "@/components/tables/data-table";
+import { BulkActionsBar } from "./bulk-actions";
 import { Eye, Filter, Pencil } from "lucide-react";
 import type { Customer, User } from "@/db/schema";
 
@@ -31,6 +32,7 @@ interface TeamCustomersTableProps {
   page: number;
   pageSize: number;
   totalPages: number;
+  teamMembers: Pick<User, "id" | "firstName" | "lastName" | "email">[];
   currentFilters: {
     search: string;
     leadStatus: string;
@@ -62,6 +64,7 @@ export function TeamCustomersTable({
   page,
   pageSize,
   totalPages,
+  teamMembers,
   currentFilters,
 }: TeamCustomersTableProps) {
   const router = useRouter();
@@ -70,6 +73,7 @@ export function TeamCustomersTable({
   const [selectedCustomer, setSelectedCustomer] = React.useState<CustomerWithRelations | null>(null);
   const [showEditDialog, setShowEditDialog] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
 
   const editForm = useForm<EditFormData>({
     resolver: zodResolver(editSchema),
@@ -144,7 +148,53 @@ export function TeamCustomersTable({
     router.push(`/team/customers?${params.toString()}`);
   };
 
+  const pageIds = customers.map((c) => c.id);
+  const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selectedIds.has(id));
+
+  const toggleRow = (id: string) =>
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+
+  const toggleAllPage = () =>
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (allPageSelected) {
+        pageIds.forEach((id) => next.delete(id));
+      } else {
+        pageIds.forEach((id) => next.add(id));
+      }
+      return next;
+    });
+
   const columns: ColumnDef<CustomerWithRelations, any>[] = [
+    {
+      id: "select",
+      header: () => (
+        <input
+          type="checkbox"
+          aria-label="Select all customers on this page"
+          checked={allPageSelected}
+          onChange={toggleAllPage}
+          className="h-4 w-4 rounded border-slate-300 accent-emerald-600"
+        />
+      ),
+      cell: ({ row }) => (
+        <input
+          type="checkbox"
+          aria-label={`Select ${row.original.name}`}
+          checked={selectedIds.has(row.original.id)}
+          onChange={() => toggleRow(row.original.id)}
+          className="h-4 w-4 rounded border-slate-300 accent-emerald-600"
+        />
+      ),
+    },
     {
       accessorKey: "name",
       header: "Name",
@@ -275,6 +325,17 @@ export function TeamCustomersTable({
           </div>
         </div>
       )}
+
+      {/* Bulk actions (multi-select delete / assign) */}
+      <BulkActionsBar
+        ids={[...selectedIds]}
+        teamMembers={teamMembers}
+        onClear={() => setSelectedIds(new Set())}
+        onDone={() => {
+          setSelectedIds(new Set());
+          router.refresh();
+        }}
+      />
 
       {/* Table */}
       <DataTable

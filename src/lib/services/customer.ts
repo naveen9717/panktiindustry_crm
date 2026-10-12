@@ -1,6 +1,6 @@
 import type { DB } from "@/db";
-import { customers, customerRemarks, activityLogs } from "@/db/schema";
-import { eq, and, or, like, desc, asc, sql, count, sum, type SQL } from "drizzle-orm";
+import { users, customers, customerRemarks, payments, activityLogs } from "@/db/schema";
+import { eq, and, or, like, desc, asc, sql, count, sum, inArray, type SQL } from "drizzle-orm";
 import { logActivity } from "./activity";
 
 interface CreateCustomerParams {
@@ -209,6 +209,76 @@ export async function deleteCustomer({ db, id, userId, ipAddress }: DeleteCustom
     description: `Customer "${existing.name}" was deleted`,
     ipAddress,
   });
+}
+
+interface BulkCustomerActionParams {
+  db: DB;
+  ids: string[];
+  userId: string;
+  userRole: string;
+  ipAddress?: string | null;
+}
+
+export async function bulkDeleteCustomers({ db, ids, userId, userRole, ipAddress }: BulkCustomerActionParams) {
+  const rows = await db.query.customers.findMany({
+    where: userRole === "TEAM_MEMBER"
+      ? and(inArray(customers.id, ids), eq(customers.assignedTeamMemberId, userId))
+      : inArray(customers.id, ids),
+    columns: { id: true },
+  });
+  if (rows.length === 0) throw new Error("No customers found to delete");
+
+  const targetIds = rows.map((r) => r.id);
+  await db.delete(payments).where(inArray(payments.customerId, targetIds));
+  await db.delete(customerRemarks).where(inArray(customerRemarks.customerId, targetIds));
+  await db.delete(customers).where(inArray(customers.id, targetIds));
+
+  await logActivity({
+    db,
+    userId,
+    action: "CUSTOMERS_DELETED",
+    entityType: "Customer",
+    description: `${targetIds.length} customer${targetIds.length === 1 ? "" : "s"} deleted`,
+    ipAddress,
+  });
+
+  return targetIds.length;
+}
+
+interface BulkAssignCustomersParams extends BulkCustomerActionParams {
+  assignedTeamMemberId: string;
+}
+
+export async function bulkAssignCustomers({ db, ids, assignedTeamMemberId, userId, userRole, ipAddress }: BulkAssignCustomersParams) {
+  const target = await db.query.users.findFirst({
+    where: and(eq(users.id, assignedTeamMemberId), eq(users.role, "TEAM_MEMBER"), eq(users.status, "ACTIVE")),
+    columns: { id: true, firstName: true, lastName: true },
+  });
+  if (!target) throw new Error("Team member not found");
+
+  const rows = await db.query.customers.findMany({
+    where: userRole === "TEAM_MEMBER"
+      ? and(inArray(customers.id, ids), eq(customers.assignedTeamMemberId, userId))
+      : inArray(customers.id, ids),
+    columns: { id: true },
+  });
+  if (rows.length === 0) throw new Error("No customers found to assign");
+
+  const targetIds = rows.map((r) => r.id);
+  await db.update(customers)
+    .set({ assignedTeamMemberId: target.id, updatedById: userId, updatedAt: new Date() })
+    .where(inArray(customers.id, targetIds));
+
+  await logActivity({
+    db,
+    userId,
+    action: "CUSTOMERS_ASSIGNED",
+    entityType: "Customer",
+    description: `${targetIds.length} customer${targetIds.length === 1 ? "" : "s"} assigned to "${target.firstName} ${target.lastName}"`,
+    ipAddress,
+  });
+
+  return targetIds.length;
 }
 
 interface GetCustomersParams {

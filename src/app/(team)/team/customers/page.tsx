@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { TeamLayout } from "@/components/layout/team-layout";
 import { TeamCustomersTable } from "@/components/customers/team-customers-table";
 import { getCustomers } from "@/lib/services/customer";
+import { getActiveTeamMembers } from "@/lib/services/team-member";
 
 export const dynamic = "force-dynamic";
 
@@ -40,18 +41,22 @@ export default async function TeamCustomersPage({ searchParams }: PageProps) {
   const dateFrom = params.dateFrom || "";
   const dateTo = params.dateTo || "";
 
-  const data = await getCustomers({ db, 
-    page,
-    pageSize: 10,
-    search,
-    leadStatus,
-    state,
-    city,
-    dateFrom,
-    dateTo,
-    userId: user.id,
-    userRole: user.role,
-  });
+  const [data, teamMembers] = await Promise.all([
+    getCustomers({
+      db,
+      page,
+      pageSize: 10,
+      search,
+      leadStatus,
+      state,
+      city,
+      dateFrom,
+      dateTo,
+      userId: user.id,
+      userRole: user.role,
+    }),
+    getActiveTeamMembers(db),
+  ]);
 
   return (
     <TeamLayout user={user}>
@@ -62,6 +67,7 @@ export default async function TeamCustomersPage({ searchParams }: PageProps) {
           page={data.page}
           pageSize={data.pageSize}
           totalPages={data.totalPages}
+          teamMembers={teamMembers}
           currentFilters={{ search, leadStatus, state, city, dateFrom, dateTo }}
         />
       </div>
