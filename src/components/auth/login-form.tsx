@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -15,7 +14,7 @@ import { Label } from "@/components/ui/label";
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email"),
   password: z.string().min(1, "Password is required"),
-  rememberMe: z.boolean().default(false),
+  rememberMe: z.boolean().default(true),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -47,7 +46,7 @@ export function LoginForm() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, rememberMe: true }),
       });
 
       const result = await res.json();
@@ -130,21 +129,16 @@ export function LoginForm() {
               )}
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="flex items-center">
               <label className="flex items-center gap-2 text-sm text-slate-600">
                 <input
                   type="checkbox"
-                  className="h-4 w-4 rounded border-slate-300"
-                  {...register("rememberMe")}
+                  className="h-4 w-4 rounded border-slate-300 accent-emerald-600"
+                  checked
+                  onChange={() => {}}
                 />
                 Remember me
               </label>
-              <Link
-                href="/forgot-password"
-                className="text-sm font-medium text-slate-900 hover:underline"
-              >
-                Forgot password?
-              </Link>
             </div>
 
             <Button type="submit" className="w-full" loading={loading}>
