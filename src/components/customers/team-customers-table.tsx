@@ -215,7 +215,7 @@ export function TeamCustomersTable({
       header: "Status",
       cell: ({ row }) => (
         <Badge variant={getLeadStatusBadgeVariant(row.original.leadStatus)}>
-          {row.original.leadStatus.replace(/_/g, " ")}
+          {truncate(row.original.leadStatus.replace(/_/g, " "), 8)}
         </Badge>
       ),
     },
