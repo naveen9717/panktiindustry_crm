@@ -23,6 +23,10 @@ interface DataTableProps<TData extends RowData, TValue> {
   data: TData[];
   searchPlaceholder?: string;
   searchKey?: string;
+  /** Controlled search text. When provided with onSearchChange, search runs server-side. */
+  searchValue?: string;
+  /** Fires (debounced) when the user types in the search box in server-search mode. */
+  onSearchChange?: (value: string) => void;
   totalItems?: number;
   pageSize?: number;
   onPageChange?: (page: number) => void;
@@ -35,6 +39,8 @@ export function DataTable<TData extends RowData, TValue>({
   data,
   searchPlaceholder = "Search...",
   searchKey,
+  searchValue,
+  onSearchChange,
   totalItems,
   pageSize = 25,
   onPageChange,
@@ -43,6 +49,27 @@ export function DataTable<TData extends RowData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = React.useState("");
+  const [localSearch, setLocalSearch] = React.useState(searchValue ?? "");
+
+  const isServerSearch = typeof onSearchChange === "function";
+
+  // Debounced server-side search: fire only after typing pauses.
+  React.useEffect(() => {
+    if (!isServerSearch) return;
+    const timer = setTimeout(() => {
+      if (localSearch !== (searchValue ?? "")) {
+        onSearchChange(localSearch);
+      }
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [localSearch, isServerSearch]);
+
+  // Sync local input when the URL search changes externally (clear filters, back button, panel input).
+  React.useEffect(() => {
+    if (isServerSearch && searchValue !== undefined && searchValue !== localSearch) {
+      setLocalSearch(searchValue);
+    }
+  }, [searchValue, isServerSearch]);
 
   const table = useLegacyTable({
     data,
@@ -68,8 +95,10 @@ export function DataTable<TData extends RowData, TValue>({
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <Input
               placeholder={searchPlaceholder}
-              value={globalFilter}
-              onChange={(e) => setGlobalFilter(e.target.value)}
+              value={isServerSearch ? localSearch : globalFilter}
+              onChange={(e) =>
+                isServerSearch ? setLocalSearch(e.target.value) : setGlobalFilter(e.target.value)
+              }
               className="pl-9"
             />
           </div>

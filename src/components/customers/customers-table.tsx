@@ -327,6 +327,8 @@ export function CustomersTable({
         data={customers}
         searchPlaceholder="Search by name, email, phone..."
         searchKey="search"
+        searchValue={currentFilters.search}
+        onSearchChange={(value) => updateParams({ search: value })}
         totalItems={total}
         pageSize={pageSize}
         currentPage={page}
