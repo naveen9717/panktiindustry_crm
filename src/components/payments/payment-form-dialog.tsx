@@ -28,7 +28,8 @@ const paymentFormSchema = z
     amount: z.number().min(0, "Enter a valid amount"),
     pendingAmount: z.number().min(0, "Enter a valid amount"),
     paymentDate: z.string().min(1, "Date is required"),
-    paymentMode: z.enum(["CASH", "UPI", "BANK_TRANSFER"]),
+    paymentMode: z.enum(["CASH", "BANK_TRANSFER", "UPI", "CREDIT_CARD", "DEBIT_CARD", "CHEQUE", "OTHER"]),
+    paymentStatus: z.enum(["PENDING", "PARTIAL", "PAID", "FAILED", "REFUNDED"]).optional(),
     remarks: z.string().max(1000).optional().or(z.literal("")),
   })
   .refine((data) => data.amount > 0 || data.pendingAmount > 0, {
@@ -57,6 +58,37 @@ const MODE_OPTIONS = [
   { value: "BANK_TRANSFER", label: "Bank Transfer" },
 ];
 
+/* Edit mode offers every stored mode so an existing value always displays */
+const ALL_MODE_OPTIONS = [
+  { value: "CASH", label: "Cash" },
+  { value: "BANK_TRANSFER", label: "Bank Transfer" },
+  { value: "UPI", label: "UPI" },
+  { value: "CREDIT_CARD", label: "Credit Card" },
+  { value: "DEBIT_CARD", label: "Debit Card" },
+  { value: "CHEQUE", label: "Cheque" },
+  { value: "OTHER", label: "Other" },
+];
+
+const STATUS_OPTIONS = ["PENDING", "PARTIAL", "PAID", "FAILED", "REFUNDED"];
+
+/** Date value for <input type="date"> in the payment's local timezone */
+const toDateInput = (value: string | Date) => {
+  const d = new Date(value);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
+
+export interface EditablePayment {
+  id: string;
+  amount: number;
+  pendingAmount: number;
+  paymentDate: string | Date;
+  paymentMode: string;
+  paymentStatus: string;
+  remarks: string | null;
+  customer: { id: string; name: string; email: string | null; phone: string | null };
+}
+
 const today = () => new Date().toISOString().slice(0, 10);
 const initials = (name: string) =>
   name
@@ -75,15 +107,19 @@ interface PaymentFormDialogProps {
   onOpenChange: (open: boolean) => void;
   /** Admin mode: pick the team member first; the customer list loads for that member. */
   adminMode?: boolean;
+  /** Edit mode: customer is fixed, fields prefilled, saves with PUT. */
+  payment?: EditablePayment | null;
 }
 
 export function PaymentFormDialog({
   open,
   onOpenChange,
   adminMode = false,
+  payment = null,
 }: PaymentFormDialogProps) {
   const router = useRouter();
   const [loading, setLoading] = React.useState(false);
+  const editMode = !!payment;
 
   const [options, setOptions] = React.useState<CustomerOption[]>([]);
   const [query, setQuery] = React.useState("");
@@ -155,6 +191,20 @@ export function PaymentFormDialog({
   // Fresh form + first page of customers each time the dialog opens
   React.useEffect(() => {
     if (!open) return;
+    if (payment) {
+      // Edit mode: prefilled, customer fixed, no lists to fetch
+      reset({
+        amount: payment.amount,
+        pendingAmount: payment.pendingAmount,
+        paymentDate: toDateInput(payment.paymentDate),
+        paymentMode: (ALL_MODE_OPTIONS.some((m) => m.value === payment.paymentMode)
+          ? payment.paymentMode
+          : "CASH") as PaymentFormValues["paymentMode"],
+        paymentStatus: payment.paymentStatus as PaymentFormValues["paymentStatus"],
+        remarks: payment.remarks || "",
+      });
+      return;
+    }
     reset({
       customerId: "",
       amount: 0,
@@ -174,11 +224,11 @@ export function PaymentFormDialog({
       fetchMembers();
     }
     fetchCustomers("", "");
-  }, [open, reset, fetchCustomers, fetchMembers, adminMode]);
+  }, [open, payment, reset, fetchCustomers, fetchMembers, adminMode]);
 
   // Debounced search; typing over the old pick clears the selection
   React.useEffect(() => {
-    if (!open) return;
+    if (!open || editMode) return;
     if (query !== selectedName.current) {
       setValue("customerId", "", { shouldValidate: true });
     }
@@ -206,6 +256,40 @@ export function PaymentFormDialog({
   };
 
   const onSubmit = async (data: PaymentFormValues) => {
+    if (editMode && payment) {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/payments/${payment.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            amount: data.amount,
+            pendingAmount: data.pendingAmount,
+            paymentDate: data.paymentDate,
+            paymentMode: data.paymentMode,
+            paymentStatus: data.paymentStatus,
+            remarks: data.remarks || "",
+          }),
+        });
+
+        const result = await res.json();
+
+        if (!res.ok) {
+          toast.error(result.error || "Could not update payment");
+          return;
+        }
+
+        toast.success("Payment updated");
+        onOpenChange(false);
+        router.refresh();
+      } catch {
+        toast.error("Could not update payment");
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
     if (adminMode && !teamMemberId) {
       setMemberError(true);
       return;
@@ -246,13 +330,13 @@ export function PaymentFormDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogHeader>
-        <DialogTitle>Add Payment</DialogTitle>
+        <DialogTitle>{editMode ? "Edit Payment" : "Add Payment"}</DialogTitle>
         <DialogClose onClick={() => onOpenChange(false)} />
       </DialogHeader>
       <form onSubmit={handleSubmit(onSubmit)}>
         <DialogContent className="max-w-2xl">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {adminMode && (
+            {adminMode && !editMode && (
               <div className="space-y-2 sm:col-span-2">
                 <Label htmlFor="teamMember">Team Member *</Label>
                 <Select
@@ -271,6 +355,17 @@ export function PaymentFormDialog({
                 {memberError && <p className="text-xs text-red-500">Select a team member</p>}
               </div>
             )}
+            {editMode ? (
+              <div className="space-y-2 sm:col-span-2">
+                <Label>Customer</Label>
+                <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                  <p className="text-sm font-medium text-slate-900">{payment.customer.name}</p>
+                  <p className="text-xs text-slate-500">
+                    {payment.customer.email || payment.customer.phone}
+                  </p>
+                </div>
+              </div>
+            ) : (
             <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="customer">Customer *</Label>
               <div className="relative">
@@ -343,6 +438,7 @@ export function PaymentFormDialog({
                 <p className="text-xs text-red-500">{errors.customerId.message}</p>
               )}
             </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="amount">Amount Received *</Label>
@@ -390,7 +486,7 @@ export function PaymentFormDialog({
             <div className="space-y-2">
               <Label htmlFor="paymentMode">Mode *</Label>
               <Select id="paymentMode" error={!!errors.paymentMode} {...register("paymentMode")}>
-                {MODE_OPTIONS.map((mode) => (
+                {(editMode ? ALL_MODE_OPTIONS : MODE_OPTIONS).map((mode) => (
                   <option key={mode.value} value={mode.value}>
                     {mode.label}
                   </option>
@@ -400,6 +496,22 @@ export function PaymentFormDialog({
                 <p className="text-xs text-red-500">{errors.paymentMode.message}</p>
               )}
             </div>
+
+            {editMode && (
+              <div className="space-y-2">
+                <Label htmlFor="paymentStatus">Status *</Label>
+                <Select id="paymentStatus" error={!!errors.paymentStatus} {...register("paymentStatus")}>
+                  {STATUS_OPTIONS.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </Select>
+                {errors.paymentStatus && (
+                  <p className="text-xs text-red-500">{errors.paymentStatus.message}</p>
+                )}
+              </div>
+            )}
 
             <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="remarks">Remarks</Label>
@@ -418,7 +530,7 @@ export function PaymentFormDialog({
             Cancel
           </Button>
           <Button type="submit" loading={loading}>
-            Add Payment
+            {editMode ? "Save Changes" : "Add Payment"}
           </Button>
         </DialogFooter>
       </form>

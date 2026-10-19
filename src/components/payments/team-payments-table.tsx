@@ -11,7 +11,7 @@ import { Select } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { PaymentFormDialog } from "@/components/payments/payment-form-dialog";
-import { Filter, Plus, IndianRupee, Clock, CreditCard, CheckCircle } from "lucide-react";
+import { Filter, Plus, Pencil, IndianRupee, Clock, CreditCard, CheckCircle } from "lucide-react";
 import type { Payment, User, Customer } from "@/db/schema";
 
 type PaymentWithRelations = Payment & {
@@ -58,6 +58,7 @@ export function TeamPaymentsTable({
   const searchParams = useSearchParams();
   const [showFilters, setShowFilters] = React.useState(false);
   const [showAddPayment, setShowAddPayment] = React.useState(false);
+  const [editPayment, setEditPayment] = React.useState<PaymentWithRelations | null>(null);
 
   const updateParams = (updates: Record<string, string>) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -150,6 +151,14 @@ export function TeamPaymentsTable({
 
       <PaymentFormDialog open={showAddPayment} onOpenChange={setShowAddPayment} />
 
+      <PaymentFormDialog
+        open={!!editPayment}
+        onOpenChange={(o) => {
+          if (!o) setEditPayment(null);
+        }}
+        payment={editPayment}
+      />
+
       {/* Stats */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
@@ -213,12 +222,13 @@ export function TeamPaymentsTable({
                 <th className="px-4 py-3 text-left font-medium text-slate-500">Mode</th>
                 <th className="px-4 py-3 text-left font-medium text-slate-500">Status</th>
                 <th className="px-4 py-3 text-left font-medium text-slate-500">Remarks</th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">Actions</th>
               </tr>
             </thead>
             <tbody>
               {payments.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
+                  <td colSpan={8} className="px-4 py-8 text-center text-slate-500">
                     No payments found
                   </td>
                 </tr>
@@ -241,6 +251,17 @@ export function TeamPaymentsTable({
                       </Badge>
                     </td>
                     <td className="px-4 py-3 text-slate-600">{truncate(payment.remarks, 30) || "-"}</td>
+                    <td className="px-4 py-3">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={`Edit payment for ${payment.customer.name}`}
+                        title="Edit payment"
+                        onClick={() => setEditPayment(payment)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </td>
                   </tr>
                 ))
               )}

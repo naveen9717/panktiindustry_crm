@@ -12,7 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { ViewClientDialog } from "@/components/payments/view-client-dialog";
 import { PaymentFormDialog } from "@/components/payments/payment-form-dialog";
-import { Plus, Filter, Download, Eye, IndianRupee, Clock, CreditCard, CheckCircle } from "lucide-react";
+import { Plus, Filter, Download, Eye, Pencil, IndianRupee, Clock, CreditCard, CheckCircle } from "lucide-react";
 import type { Payment, User, Customer } from "@/db/schema";
 
 type PaymentWithRelations = Payment & {
@@ -67,6 +67,7 @@ export function PaymentsTable({
   const [showFilters, setShowFilters] = React.useState(false);
   const [viewCustomerId, setViewCustomerId] = React.useState<string | null>(null);
   const [showAddPayment, setShowAddPayment] = React.useState(false);
+  const [editPayment, setEditPayment] = React.useState<PaymentWithRelations | null>(null);
 
   const updateParams = (updates: Record<string, string>) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -182,6 +183,15 @@ export function PaymentsTable({
 
       <PaymentFormDialog open={showAddPayment} onOpenChange={setShowAddPayment} adminMode />
 
+      <PaymentFormDialog
+        open={!!editPayment}
+        onOpenChange={(o) => {
+          if (!o) setEditPayment(null);
+        }}
+        payment={editPayment}
+        adminMode
+      />
+
       <ViewClientDialog customerId={viewCustomerId} onClose={() => setViewCustomerId(null)} />
 
       {/* Stats */}
@@ -289,7 +299,7 @@ export function PaymentsTable({
                 <th className="px-4 py-3 text-left font-medium text-slate-500">Mode</th>
                 <th className="px-4 py-3 text-left font-medium text-slate-500">Status</th>
                 <th className="px-4 py-3 text-left font-medium text-slate-500">Remarks</th>
-                <th className="px-4 py-3 text-left font-medium text-slate-500">View</th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -322,14 +332,25 @@ export function PaymentsTable({
                     </td>
                     <td className="px-4 py-3 text-slate-600">{truncate(payment.remarks, 30) || "-"}</td>
                     <td className="px-4 py-3">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title="View client details"
-                        onClick={() => setViewCustomerId(payment.customer.id)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="View client details"
+                          onClick={() => setViewCustomerId(payment.customer.id)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label={`Edit payment for ${payment.customer.name}`}
+                          title="Edit payment"
+                          onClick={() => setEditPayment(payment)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))
