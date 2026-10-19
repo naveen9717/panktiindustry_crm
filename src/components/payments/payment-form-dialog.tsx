@@ -194,6 +194,7 @@ export function PaymentFormDialog({
     if (payment) {
       // Edit mode: prefilled, customer fixed, no lists to fetch
       reset({
+        customerId: payment.customer.id,
         amount: payment.amount,
         pendingAmount: payment.pendingAmount,
         paymentDate: toDateInput(payment.paymentDate),
